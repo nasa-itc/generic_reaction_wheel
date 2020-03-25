@@ -13,6 +13,7 @@
 #include "generic_reaction_wheel_events.h"
 #include "generic_reaction_wheel_version.h"
 #include "generic_reaction_wheel_app.h"
+#include "hwlib.h"
 
 #include <string.h>
 
@@ -20,6 +21,9 @@
 ** global data
 */
 GENERIC_RW_AppData_t GENERIC_RW_AppData;
+
+/* Forward declarations */
+static void UART_GetMomentum(uint8 DataBuffer[], int32 *DataLen);
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * *  * * * * **/
 /* GENERIC_RW_AppMain() -- Application entry point and main process loop          */
@@ -94,6 +98,9 @@ void GENERIC_RW_AppMain( void )
 
 } /* End of GENERIC_RW_AppMain() */
 
+static char deviceName[] = "/dev/tty2";
+static uart_info_t RW_UART = {.deviceString = &deviceName[0], .handle = 2, .isOpen = PORT_CLOSED, .baud = 115200};
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  */
 /*                                                                            */
 /* GENERIC_RW_AppInit() --  initialization                                        */
@@ -156,6 +163,14 @@ int32 GENERIC_RW_AppInit( void )
                    GENERIC_RW_APP_HK_TLM_MID,
                    sizeof(GENERIC_RW_AppData.HkBuf),
                    true);
+
+    /* Connect to the UART */
+    status = uart_init_port(&RW_UART);
+    if(status != CFE_SUCCESS)
+    {
+    	CFE_ES_WriteToSysLog("GENERIC_RW App: UART port initialization error!\n");
+    }    
+    
 
     /*
     ** Create Software Bus message pipe.
@@ -228,7 +243,7 @@ void GENERIC_RW_ProcessCommandPacket( CFE_SB_MsgPtr_t Msg )
             break;
 
         case GENERIC_RW_APP_SEND_HK_MID:
-            GENERIC_RW_ReportHousekeeping((CCSDS_CommandPacket_t *)Msg);
+            GENERIC_RW_ReportHousekeeping();
             break;
 
         default:
@@ -251,8 +266,10 @@ void GENERIC_RW_ProcessCommandPacket( CFE_SB_MsgPtr_t Msg )
 void GENERIC_RW_ProcessGroundCommand( CFE_SB_MsgPtr_t Msg )
 {
     uint16 CommandCode;
-
     CommandCode = CFE_SB_GetCmdCode(Msg);
+
+    uint8_t *DataBuffer;
+    int32 DataLen;
 
     /*
     ** Process "known" GENERIC_RW app ground commands
@@ -275,6 +292,39 @@ void GENERIC_RW_ProcessGroundCommand( CFE_SB_MsgPtr_t Msg )
 
             break;
 
+		/* Request Generic Reaction Wheel data 		*/
+		case GENERIC_RW_APP_REQ_DATA_CC:
+
+            CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_DEBUG,"Request Generic Reaction Wheel Data");
+
+            /* todo - fix the 1024 hard coded number */
+            DataBuffer = (uint8_t *)malloc((1024) * sizeof(uint8_t));
+
+            /* Read data from the UART */
+            UART_GetMomentum(DataBuffer, &DataLen);
+            DataBuffer[DataLen] = 0; // Ensure null termination
+            OS_printf("GENERIC_RW: Received message (length=%d) from UART=%s\n", DataLen, DataBuffer);
+
+
+            //GPSSerialiation GPSData = NAV_ParseOEM615Bestxyza(DataBuffer, DataLen);
+            //GPSSerialiation *GPSData = (GPSSerialiation *)DataBuffer; /* todo - poor man's serialization until nos engine serialization is exposed on C interface */
+            //memcpy(&NAV_AppData.hk.gps_data, &GPSData, sizeof(GPSSerialiation));
+
+            //CFE_EVS_SendEvent(NAV_CMD_REQ_DATA_EID, CFE_EVS_INFORMATION,
+            //    "GPS Week = %lu, Seconds = %lu, GPS Fraction = %f, "
+            //    "GPS ECEF_X = %f, ECEF_Y = %f, ECEF_Z = %f, "
+            //    "GPS X Vel = %f, Y Vel = %f, Z Vel = %f",
+            //    (unsigned long)GPSData.weeks, (unsigned long)GPSData.seconds_into_week, GPSData.fractions,
+            //    GPSData.ECEF_X, GPSData.ECEF_Y, GPSData.ECEF_Z,
+            //    GPSData.vel_x, GPSData.vel_y, GPSData.vel_z);
+
+            /* Cleanup the data buffer once finished with the data */
+            free(DataBuffer);
+
+			/* publish the HK message which includes reaction wheel data */
+			GENERIC_RW_ReportHousekeeping();
+			break;
+
         /* default case already found during FC vs length test */
         default:
             CFE_EVS_SendEvent(GENERIC_RW_COMMAND_ERR_EID,
@@ -288,6 +338,29 @@ void GENERIC_RW_ProcessGroundCommand( CFE_SB_MsgPtr_t Msg )
 
 } /* End of GENERIC_RW_ProcessGroundCommand() */
 
+/************************************************************************
+** Read data from the UART
+*************************************************************************/
+static void UART_GetMomentum(uint8 DataBuffer[], int32 *DataLen)
+{
+    char *request = "CURRENT_MOMENTUM";
+    int32_t status = uart_write_port(RW_UART.handle, (uint8_t*)request, strlen(request));
+    if (status < 0) {
+        OS_printf("UART_GetMomentum: Error writing to UART=%d\n", status);
+    }
+    /* check how many bytes are waiting on the uart */
+    *DataLen = uart_bytes_available(RW_UART.handle);
+    if (*DataLen > 0)
+    {
+        /* grab the bytes */
+        status = uart_read_port(RW_UART.handle, DataBuffer, *DataLen);
+        if (status < 0) {
+            OS_printf("UART_GetMomentum: Error reading from UART=%d\n", status);
+        }
+    }
+}
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 /*  Name:  GENERIC_RW_ReportHousekeeping                                          */
 /*                                                                            */
@@ -297,7 +370,7 @@ void GENERIC_RW_ProcessGroundCommand( CFE_SB_MsgPtr_t Msg )
 /*         telemetry, packetize it and send it to the housekeeping task via   */
 /*         the software bus                                                   */
 /* * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * *  * *  * * * * */
-int32 GENERIC_RW_ReportHousekeeping( const CCSDS_CommandPacket_t *Msg )
+int32 GENERIC_RW_ReportHousekeeping(void)
 {
     int i;
 

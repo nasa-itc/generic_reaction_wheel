@@ -17,6 +17,7 @@
 */
 #define GENERIC_RW_APP_NOOP_CC                 0
 #define GENERIC_RW_APP_RESET_COUNTERS_CC       1
+#define GENERIC_RW_APP_REQ_DATA_CC             2
 
 /*************************************************************************/
 
@@ -46,9 +47,15 @@ typedef GENERIC_RW_NoArgsCmd_t      GENERIC_RW_ResetCounters_t;
 
 typedef struct
 {
+    double momentum;
+} GENERIC_RW_Data;
+
+
+typedef struct
+{
     uint8              CommandErrorCounter;
     uint8              CommandCounter;
-    uint8              spare[2];
+    GENERIC_RW_Data    data;
 } GENERIC_RW_HkTlm_Payload_t;
 
 typedef struct

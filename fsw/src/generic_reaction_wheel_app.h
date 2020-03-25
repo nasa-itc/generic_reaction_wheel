@@ -89,7 +89,7 @@ void  GENERIC_RW_AppMain(void);
 int32 GENERIC_RW_AppInit(void);
 void  GENERIC_RW_ProcessCommandPacket(CFE_SB_MsgPtr_t Msg);
 void  GENERIC_RW_ProcessGroundCommand(CFE_SB_MsgPtr_t Msg);
-int32 GENERIC_RW_ReportHousekeeping(const CCSDS_CommandPacket_t *Msg);
+int32 GENERIC_RW_ReportHousekeeping(void);
 int32 GENERIC_RW_ResetCounters(const GENERIC_RW_ResetCounters_t *Msg);
 int32 GENERIC_RW_Noop(const GENERIC_RW_Noop_t *Msg);
 void  GENERIC_RW_GetCrc(const char *TableName);

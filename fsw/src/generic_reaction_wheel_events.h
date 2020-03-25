@@ -20,8 +20,9 @@
 #define GENERIC_RW_INVALID_MSGID_ERR_EID          5
 #define GENERIC_RW_LEN_ERR_EID                    6
 #define GENERIC_RW_PIPE_ERR_EID                   7
+#define GENERIC_RW_CMD_REQ_DATA_EID               8
 
-#define GENERIC_RW_EVENT_COUNTS                   7
+#define GENERIC_RW_EVENT_COUNTS                   8
 
 #endif /* _generic_reaction_wheel_app_events_h_ */
 
