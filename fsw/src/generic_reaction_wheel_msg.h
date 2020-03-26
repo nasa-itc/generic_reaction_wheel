@@ -18,6 +18,7 @@
 #define GENERIC_RW_APP_NOOP_CC                 0
 #define GENERIC_RW_APP_RESET_COUNTERS_CC       1
 #define GENERIC_RW_APP_REQ_DATA_CC             2
+#define GENERIC_RW_APP_SET_TORQUE_CC           3
 
 /*************************************************************************/
 
@@ -29,6 +30,13 @@ typedef struct
    uint8    CmdHeader[CFE_SB_CMD_HDR_SIZE];
 
 } GENERIC_RW_NoArgsCmd_t;
+
+typedef struct
+{
+    uint8  CmdHeader[CFE_SB_CMD_HDR_SIZE];
+    int16  data;
+
+} GENERIC_RW_Cmd_t;
 
 /*
 ** The following commands all share the "NoArgs" format

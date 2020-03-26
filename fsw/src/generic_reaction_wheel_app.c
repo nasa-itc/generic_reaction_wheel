@@ -23,7 +23,7 @@
 GENERIC_RW_AppData_t GENERIC_RW_AppData;
 
 /* Forward declarations */
-static void UART_GetMomentum(uint8 DataBuffer[], int32 *DataLen);
+static int32_t GetCurrentMomentum(double *momentum);
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * *  * * * * **/
 /* GENERIC_RW_AppMain() -- Application entry point and main process loop          */
@@ -268,9 +268,6 @@ void GENERIC_RW_ProcessGroundCommand( CFE_SB_MsgPtr_t Msg )
     uint16 CommandCode;
     CommandCode = CFE_SB_GetCmdCode(Msg);
 
-    uint8_t *DataBuffer;
-    int32 DataLen;
-
     /*
     ** Process "known" GENERIC_RW app ground commands
     */
@@ -294,36 +291,21 @@ void GENERIC_RW_ProcessGroundCommand( CFE_SB_MsgPtr_t Msg )
 
 		/* Request Generic Reaction Wheel data 		*/
 		case GENERIC_RW_APP_REQ_DATA_CC:
-
-            CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_DEBUG,"Request Generic Reaction Wheel Data");
-
-            /* todo - fix the 1024 hard coded number */
-            DataBuffer = (uint8_t *)malloc((1024) * sizeof(uint8_t));
-
-            /* Read data from the UART */
-            UART_GetMomentum(DataBuffer, &DataLen);
-            DataBuffer[DataLen] = 0; // Ensure null termination
-            OS_printf("GENERIC_RW: Received message (length=%d) from UART=%s\n", DataLen, DataBuffer);
-
-
-            //GPSSerialiation GPSData = NAV_ParseOEM615Bestxyza(DataBuffer, DataLen);
-            //GPSSerialiation *GPSData = (GPSSerialiation *)DataBuffer; /* todo - poor man's serialization until nos engine serialization is exposed on C interface */
-            //memcpy(&NAV_AppData.hk.gps_data, &GPSData, sizeof(GPSSerialiation));
-
-            //CFE_EVS_SendEvent(NAV_CMD_REQ_DATA_EID, CFE_EVS_INFORMATION,
-            //    "GPS Week = %lu, Seconds = %lu, GPS Fraction = %f, "
-            //    "GPS ECEF_X = %f, ECEF_Y = %f, ECEF_Z = %f, "
-            //    "GPS X Vel = %f, Y Vel = %f, Z Vel = %f",
-            //    (unsigned long)GPSData.weeks, (unsigned long)GPSData.seconds_into_week, GPSData.fractions,
-            //    GPSData.ECEF_X, GPSData.ECEF_Y, GPSData.ECEF_Z,
-            //    GPSData.vel_x, GPSData.vel_y, GPSData.vel_z);
-
-            /* Cleanup the data buffer once finished with the data */
-            free(DataBuffer);
-
-			/* publish the HK message which includes reaction wheel data */
-			GENERIC_RW_ReportHousekeeping();
+            if (GENERIC_RW_VerifyCmdLength(Msg, sizeof(GENERIC_RW_ResetCounters_t)))
+            {
+                GENERIC_RW_Current_Momentum((GENERIC_RW_Noop_t *)Msg);
+            }
+            
 			break;
+
+        /* Set Generic Reaction Wheel torque */
+        case GENERIC_RW_APP_SET_TORQUE_CC:
+            if (GENERIC_RW_VerifyCmdLength(Msg, sizeof(GENERIC_RW_Cmd_t)))
+            {
+                GENERIC_RW_Set_Torque((GENERIC_RW_Cmd_t *)Msg );
+            }
+
+            break;
 
         /* default case already found during FC vs length test */
         default:
@@ -337,29 +319,6 @@ void GENERIC_RW_ProcessGroundCommand( CFE_SB_MsgPtr_t Msg )
     return;
 
 } /* End of GENERIC_RW_ProcessGroundCommand() */
-
-/************************************************************************
-** Read data from the UART
-*************************************************************************/
-static void UART_GetMomentum(uint8 DataBuffer[], int32 *DataLen)
-{
-    char *request = "CURRENT_MOMENTUM";
-    int32_t status = uart_write_port(RW_UART.handle, (uint8_t*)request, strlen(request));
-    if (status < 0) {
-        OS_printf("UART_GetMomentum: Error writing to UART=%d\n", status);
-    }
-    /* check how many bytes are waiting on the uart */
-    *DataLen = uart_bytes_available(RW_UART.handle);
-    if (*DataLen > 0)
-    {
-        /* grab the bytes */
-        status = uart_read_port(RW_UART.handle, DataBuffer, *DataLen);
-        if (status < 0) {
-            OS_printf("UART_GetMomentum: Error reading from UART=%d\n", status);
-        }
-    }
-}
-
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 /*  Name:  GENERIC_RW_ReportHousekeeping                                          */
@@ -436,6 +395,120 @@ int32 GENERIC_RW_ResetCounters( const GENERIC_RW_ResetCounters_t *Msg )
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 /*                                                                            */
+/* GENERIC_RW_Noop -- GENERIC_RW Current Momentum command                         */
+/*                                                                            */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
+int32 GENERIC_RW_Current_Momentum( const GENERIC_RW_Noop_t *Msg )
+{
+    int32_t status;
+    double momentum;
+
+    GENERIC_RW_AppData.CmdCounter++;
+    CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_DEBUG,"Request Generic Reaction Wheel Data");
+
+    /* Read data from the UART */
+    status = GetCurrentMomentum(&momentum);
+    //OS_printf("GENERIC_RW: GetCurrentMomentum:  status=%d, momentum=%f\n", status, momentum);
+    if (status > 0) {
+        GENERIC_RW_AppData.HkBuf.HkTlm.Payload.data.momentum = momentum;
+    } else {
+        CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_ERROR,"Request Generic Reaction Wheel Data - Error reading momentum");
+    }
+
+    /* publish the HK message which includes reaction wheel data */
+    GENERIC_RW_ReportHousekeeping();
+
+    return CFE_SUCCESS;
+} /* End of GENERIC_RW_Current_Momentum */
+
+/************************************************************************
+** Get current momentum data from the UART
+*************************************************************************/
+static int32_t GetCurrentMomentum(double *momentum)
+{
+    uint8_t *DataBuffer;
+    int32 DataLen;
+    /* todo - fix the 1024 hard coded number */
+    DataBuffer = (uint8_t *)malloc((1024) * sizeof(uint8_t));
+    char *reply;
+
+    char *request = "CURRENT_MOMENTUM";
+    int32_t status = uart_write_port(RW_UART.handle, (uint8_t*)request, strlen(request));
+    if (status < 0) {
+        CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_ERROR, "GetCurrentMomentum: Error writing to UART=%d\n", status);
+    }
+    /* check how many bytes are waiting on the uart */
+    DataLen = uart_bytes_available(RW_UART.handle);
+    if (DataLen > 0)
+    {
+        /* grab the bytes */
+        status = uart_read_port(RW_UART.handle, DataBuffer, DataLen);
+        if (status < 0) {
+            CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_ERROR, "GetCurrentMomentum: Error reading from UART=%d\n", status);
+        } else {
+            DataBuffer[DataLen] = 0; // Ensure null termination
+            reply = (char *)DataBuffer;
+            if (strncmp(reply, "CURRENT_MOMENTUM=", 17) == 0) {
+                *momentum = atof(&reply[17]);
+            } else {
+                status = 0;
+            }
+        }
+    }
+
+    /* Cleanup the data buffer once finished with the data */
+    free(DataBuffer);
+
+    return status;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
+/*                                                                            */
+/* GENERIC_RW_Noop -- GENERIC_RW Set Torque command                         */
+/*                                                                            */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
+int32 GENERIC_RW_Set_Torque( const GENERIC_RW_Cmd_t *Msg )
+{
+    int32_t status;
+    double torque;
+    char request[22];
+
+    GENERIC_RW_AppData.CmdCounter++;
+    CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_DEBUG,"Set Generic Reaction Wheel Torque");
+
+    GENERIC_RW_Cmd_t *cmd;
+    cmd = (GENERIC_RW_Cmd_t*)Msg;
+    CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_INFORMATION, 
+                    "Generic Reaction Wheel: Info, Set Torque Command received (%d * 10^-4 N-m)", cmd->data);
+    torque = cmd->data;
+    torque /= 10000.0; // units are 10^-4 Newton-meters (so we don't have to send floats in the command)
+
+    sprintf(request, "SET_TORQUE=%10.4f", torque);
+    status = uart_write_port(RW_UART.handle, (uint8_t*)request, strlen(request));
+    //OS_printf("Generic Reaction Wheel: Sending command:%s\n", request);
+    if (status < 0) {
+        CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_ERROR, "Generic Reaction Wheel: Error writing to UART=%d\n", status);
+    } else {
+        /* Read the reply */
+        uint8_t *DataBuffer;
+        int32 DataLen;
+        /* todo - fix the 1024 hard coded number */
+        DataBuffer = (uint8_t *)malloc((1024) * sizeof(uint8_t));
+        /* check how many bytes are waiting on the uart */
+        DataLen = uart_bytes_available(RW_UART.handle);
+        if (DataLen > 0)
+        {
+            uart_read_port(RW_UART.handle, DataBuffer, DataLen);
+            DataBuffer[DataLen] = 0; // Ensure null termination
+            //OS_printf("Generic Reaction Wheel: Response on UART=%s\n", (char *)DataBuffer);
+        }
+    }
+
+    return CFE_SUCCESS;
+} /* End of GENERIC_RW_Set_Torque */
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
+/*                                                                            */
 /* GENERIC_RW_VerifyCmdLength() -- Verify command packet length                   */
 /*                                                                            */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
@@ -469,30 +542,3 @@ bool GENERIC_RW_VerifyCmdLength( CFE_SB_MsgPtr_t Msg, uint16 ExpectedLength )
     return( result );
 
 } /* End of GENERIC_RW_VerifyCmdLength() */
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-/*                                                                 */
-/* GENERIC_RW_GetCrc -- Output CRC                                     */
-/*                                                                 */
-/*                                                                 */
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-void GENERIC_RW_GetCrc( const char *TableName )
-{
-    int32           status;
-    uint32          Crc;
-    CFE_TBL_Info_t  TblInfoPtr;
-
-    status = CFE_TBL_GetInfo(&TblInfoPtr, TableName);
-    if (status != CFE_SUCCESS)
-    {
-        CFE_ES_WriteToSysLog("GENERIC_RW App: Error Getting Table Info");
-    }
-    else
-    {
-        Crc = TblInfoPtr.Crc;
-        CFE_ES_WriteToSysLog("GENERIC_RW App: CRC: 0x%08lX\n\n", (unsigned long)Crc);
-    }
-
-    return;
-
-} /* End of GENERIC_RW_GetCrc */
