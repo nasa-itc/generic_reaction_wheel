@@ -10,5 +10,5 @@ aux_source_directory(fsw/src APP_SRC_FILES)
 include_directories(${hwlib_MISSION_DIR}/fsw/public_inc)
 
 # Create the app module
-add_cfe_app(generic_reaction_wheel ${APP_SRC_FILES})
+add_cfe_app(generic_rw ${APP_SRC_FILES})
 
