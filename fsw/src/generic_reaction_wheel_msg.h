@@ -64,7 +64,7 @@ typedef struct
     uint8              CommandErrorCounter;
     uint8              CommandCounter;
     GENERIC_RW_Data    data;
-} GENERIC_RW_HkTlm_Payload_t;
+} OS_PACK GENERIC_RW_HkTlm_Payload_t;
 
 typedef struct
 {
