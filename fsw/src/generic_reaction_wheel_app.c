@@ -159,9 +159,9 @@ int32 GENERIC_RW_AppInit( void )
     /*
     ** Initialize housekeeping packet (clear user data area).
     */
-    CFE_SB_InitMsg(&GENERIC_RW_AppData.HkBuf.MsgHdr,
+    CFE_SB_InitMsg(&GENERIC_RW_AppData.HkTlm.TlmHeader,
                    GENERIC_RW_APP_HK_TLM_MID,
-                   sizeof(GENERIC_RW_AppData.HkBuf),
+                   sizeof(GENERIC_RW_AppData.HkTlm),
                    true);
 
     /* Connect to the UART */
@@ -331,19 +331,11 @@ void GENERIC_RW_ProcessGroundCommand( CFE_SB_MsgPtr_t Msg )
 /* * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * *  * *  * * * * */
 int32 GENERIC_RW_ReportHousekeeping(void)
 {
-    int i;
-
-    /*
-    ** Get command execution counters...
-    */
-    GENERIC_RW_AppData.HkBuf.HkTlm.Payload.CommandErrorCounter = GENERIC_RW_AppData.ErrCounter;
-    GENERIC_RW_AppData.HkBuf.HkTlm.Payload.CommandCounter = GENERIC_RW_AppData.CmdCounter;
-
     /*
     ** Send housekeeping telemetry packet...
     */
-    CFE_SB_TimeStampMsg(&GENERIC_RW_AppData.HkBuf.MsgHdr);
-    CFE_SB_SendMsg(&GENERIC_RW_AppData.HkBuf.MsgHdr);
+    CFE_SB_TimeStampMsg((CFE_SB_Msg_t *) &GENERIC_RW_AppData.HkTlm.TlmHeader);
+    CFE_SB_SendMsg((CFE_SB_Msg_t *) &GENERIC_RW_AppData.HkTlm.TlmHeader);
 
     return CFE_SUCCESS;
 
@@ -410,7 +402,7 @@ int32 GENERIC_RW_Current_Momentum( const GENERIC_RW_Noop_t *Msg )
     status = GetCurrentMomentum(&momentum);
     //OS_printf("GENERIC_RW: GetCurrentMomentum:  status=%d, momentum=%f\n", status, momentum);
     if (status > 0) {
-        GENERIC_RW_AppData.HkBuf.HkTlm.Payload.data.momentum = momentum;
+        GENERIC_RW_AppData.HkTlm.Payload.data.momentum = momentum;
     } else {
         CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_ERROR,"Request Generic Reaction Wheel Data - Error reading momentum");
     }

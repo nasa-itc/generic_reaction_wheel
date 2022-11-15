@@ -32,16 +32,6 @@
 *************************************************************************/
 
 /*
- * Buffer to hold telemetry data prior to sending
- * Defined as a union to ensure proper alignment for a CFE_SB_Msg_t type
- */
-typedef union
-{
-    CFE_SB_Msg_t        MsgHdr;
-    GENERIC_RW_HkTlm_t  HkTlm;
-} GENERIC_RW_HkBuffer_t;
-
-/*
 ** Global Data
 */
 typedef struct
@@ -55,7 +45,7 @@ typedef struct
     /*
     ** Housekeeping telemetry packet...
     */
-    GENERIC_RW_HkBuffer_t     HkBuf;
+    GENERIC_RW_HkTlm_t  HkTlm;
 
     /*
     ** Run Status variable used in the main processing loop
