@@ -38,6 +38,7 @@ typedef struct
     int16  data;
 
 } OS_PACK GENERIC_RW_Cmd_t;
+#define GENERIC_RW_CMD_LEN sizeof(GENERIC_RW_Cmd_t)
 
 /*
 ** The following commands all share the "NoArgs" format
