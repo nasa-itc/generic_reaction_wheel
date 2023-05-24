@@ -436,10 +436,8 @@ int32 GENERIC_RW_Current_Momentum( const GENERIC_RW_Noop_t *Msg )
 *************************************************************************/
 static int32_t GetCurrentMomentum(int wheel_number, double *momentum)
 {
-    uint8_t *DataBuffer;
+    uint8_t DataBuffer[1024];
     int32 DataLen;
-    /* todo - fix the 1024 hard coded number */
-    DataBuffer = (uint8_t *)malloc((1024) * sizeof(uint8_t));
     char *reply;
 
     char *request = "CURRENT_MOMENTUM";
@@ -466,9 +464,6 @@ static int32_t GetCurrentMomentum(int wheel_number, double *momentum)
         }
     }
 
-    /* Cleanup the data buffer once finished with the data */
-    free(DataBuffer);
-
     return status;
 }
 
@@ -484,11 +479,9 @@ int32 GENERIC_RW_Set_Torque( const GENERIC_RW_Cmd_t *Msg )
     char request[22];
 
     GENERIC_RW_AppData.CmdCounter++;
-    CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_DEBUG,"Set Generic Reaction Wheel Torque");
-
     GENERIC_RW_Cmd_t *cmd;
     cmd = (GENERIC_RW_Cmd_t*)Msg;
-    CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_INFORMATION, 
+    CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_DEBUG, 
                     "Generic Reaction Wheel %d: Info, Set Torque Command received (%d * 10^-4 N-m)", cmd->wheel_number, cmd->data);
     torque = cmd->data;
     torque /= 10000.0; // units are 10^-4 Newton-meters (so we don't have to send floats in the command)
@@ -500,10 +493,8 @@ int32 GENERIC_RW_Set_Torque( const GENERIC_RW_Cmd_t *Msg )
         CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_ERROR, "Generic Reaction Wheel: Error writing to UART=%d\n", status);
     } else {
         /* Read the reply */
-        uint8_t *DataBuffer;
+        uint8_t DataBuffer[1024];
         int32 DataLen;
-        /* todo - fix the 1024 hard coded number */
-        DataBuffer = (uint8_t *)malloc((1024) * sizeof(uint8_t));
         /* check how many bytes are waiting on the uart */
         DataLen = uart_bytes_available(RW_UART[cmd->wheel_number].handle);
         if (DataLen > 0)
