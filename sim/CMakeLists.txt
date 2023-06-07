@@ -28,8 +28,3 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH}:$ORIGIN/../lib") # Pick up .so i
 add_library(generic_rw_sim SHARED ${generic_rw_sim_src} ${generic_rw_sim_inc})
 target_link_libraries(generic_rw_sim ${generic_rw_sim_libs})
 install(TARGETS generic_rw_sim LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
-
-add_executable(nos3-generic-reactionwheel-simulator src/generic_reaction_wheel_sim.cpp)
-target_link_libraries(nos3-generic-reactionwheel-simulator generic_rw_sim ${generic_rw_sim_libs})
-install(TARGETS nos3-generic-reactionwheel-simulator RUNTIME DESTINATION bin)
-install(TARGETS generic_rw_sim LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
