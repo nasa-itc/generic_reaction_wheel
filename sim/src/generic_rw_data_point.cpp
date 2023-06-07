@@ -29,7 +29,7 @@ namespace Nos3
     //}
 
     GenericRWDataPoint::GenericRWDataPoint(int16_t spacecraft, int16_t reactionwheel, const boost::shared_ptr<Sim42DataPoint> dp) : 
-        _sc(spacecraft), _reactionwheel(reactionwheel), _dp(*dp), _not_parsed(true) 
+        _dp(*dp), _sc(spacecraft), _reactionwheel(reactionwheel), _not_parsed(true) 
     {
         sim_logger->trace("GPSSimDataPoint::GPSSimDataPoint:  Created instance using _sc=%d, _gps=%d, _dp=%s", 
             _sc, _reactionwheel, _dp.to_string().c_str());
@@ -51,7 +51,7 @@ namespace Nos3
         std::vector<std::string> lines = _dp.get_lines();
         
         try {
-            for (int i = 0; i < lines.size(); i++) {
+            for (unsigned int i = 0; i < lines.size(); i++) {
                 if (lines[i].compare(0, MSsize, MatchString.str()) == 0) { // e.g. SC[0].AC.Whl[0]
                     sim_logger->trace("GenericRWDataPoint::do_parsing:  Found a string with the correct prefix = %s.  String:  %s", MatchString.str().c_str(), lines[i].c_str());
                     // Whl. H (momentum)
