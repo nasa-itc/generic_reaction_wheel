@@ -115,8 +115,8 @@ int32 GENERIC_RW_AppInit( void )
     /*
     ** Initialize app command execution counters
     */
-    GENERIC_RW_AppData.CmdCounter = 0;
-    GENERIC_RW_AppData.ErrCounter = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter = 0;
 
     /*
     ** Initialize app configuration data
@@ -329,7 +329,7 @@ int32 GENERIC_RW_ReportHousekeeping(void)
 int32 GENERIC_RW_Noop( const GENERIC_RW_Noop_t *Msg )
 {
 
-    GENERIC_RW_AppData.CmdCounter++;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
 
     CFE_EVS_SendEvent(GENERIC_RW_COMMANDNOP_INF_EID,
                       CFE_EVS_EventType_INFORMATION,
@@ -354,8 +354,8 @@ int32 GENERIC_RW_Noop( const GENERIC_RW_Noop_t *Msg )
 int32 GENERIC_RW_ResetCounters( const GENERIC_RW_ResetCounters_t *Msg )
 {
 
-    GENERIC_RW_AppData.CmdCounter = 0;
-    GENERIC_RW_AppData.ErrCounter = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter = 0;
 
     CFE_EVS_SendEvent(GENERIC_RW_COMMANDRST_INF_EID,
                       CFE_EVS_EventType_INFORMATION,
@@ -375,7 +375,7 @@ int32 GENERIC_RW_Current_Momentum( const GENERIC_RW_Noop_t *Msg )
     int32_t status;
     double momentum;
 
-    GENERIC_RW_AppData.CmdCounter++;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
     CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_DEBUG,"Request Generic Reaction Wheel Data");
 
     /* Read data from the UART */
@@ -445,7 +445,7 @@ int32 GENERIC_RW_Set_Torque( const GENERIC_RW_Cmd_t *Msg )
     double torque;
     char request[22];
 
-    GENERIC_RW_AppData.CmdCounter++;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
     CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_DEBUG,"Set Generic Reaction Wheel Torque");
 
     GENERIC_RW_Cmd_t *cmd;
@@ -508,7 +508,7 @@ bool GENERIC_RW_VerifyCmdLength( CFE_SB_MsgPtr_t Msg, uint16 ExpectedLength )
 
         result = false;
 
-        GENERIC_RW_AppData.ErrCounter++;
+        GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter++;
     }
 
     return( result );
