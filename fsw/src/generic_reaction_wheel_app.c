@@ -126,29 +126,9 @@ int32 GENERIC_RW_AppInit( void )
     strcpy(GENERIC_RW_AppData.PipeName, "GEN_RW_CMD_PIPE");
 
     /*
-    ** Initialize event filter table...
-    */
-    GENERIC_RW_AppData.EventFilters[0].EventID = GENERIC_RW_STARTUP_INF_EID;
-    GENERIC_RW_AppData.EventFilters[0].Mask    = 0x0000;
-    GENERIC_RW_AppData.EventFilters[1].EventID = GENERIC_RW_COMMAND_ERR_EID;
-    GENERIC_RW_AppData.EventFilters[1].Mask    = 0x0000;
-    GENERIC_RW_AppData.EventFilters[2].EventID = GENERIC_RW_COMMANDNOP_INF_EID;
-    GENERIC_RW_AppData.EventFilters[2].Mask    = 0x0000;
-    GENERIC_RW_AppData.EventFilters[3].EventID = GENERIC_RW_COMMANDRST_INF_EID;
-    GENERIC_RW_AppData.EventFilters[3].Mask    = 0x0000;
-    GENERIC_RW_AppData.EventFilters[4].EventID = GENERIC_RW_INVALID_MSGID_ERR_EID;
-    GENERIC_RW_AppData.EventFilters[4].Mask    = 0x0000;
-    GENERIC_RW_AppData.EventFilters[5].EventID = GENERIC_RW_LEN_ERR_EID;
-    GENERIC_RW_AppData.EventFilters[5].Mask    = 0x0000;
-    GENERIC_RW_AppData.EventFilters[6].EventID = GENERIC_RW_PIPE_ERR_EID;
-    GENERIC_RW_AppData.EventFilters[6].Mask    = 0x0000;
-
-    /*
     ** Register the events
     */
-    status = CFE_EVS_Register(GENERIC_RW_AppData.EventFilters,
-                              GENERIC_RW_EVENT_COUNTS,
-                              CFE_EVS_EventFilter_BINARY);
+    status = CFE_EVS_Register(NULL, 0, CFE_EVS_EventFilter_BINARY);
     if (status != CFE_SUCCESS)
     {
         CFE_ES_WriteToSysLog("GENERIC_RW App: Error Registering Events, RC = 0x%08lX\n",
