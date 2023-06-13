@@ -34,9 +34,11 @@ typedef struct
 typedef struct
 {
     uint8  CmdHeader[CFE_SB_CMD_HDR_SIZE];
+    uint8  wheel_number;
     int16  data;
 
-} GENERIC_RW_Cmd_t;
+} OS_PACK GENERIC_RW_Cmd_t;
+#define GENERIC_RW_CMD_LEN sizeof(GENERIC_RW_Cmd_t)
 
 /*
 ** The following commands all share the "NoArgs" format
@@ -55,7 +57,7 @@ typedef GENERIC_RW_NoArgsCmd_t      GENERIC_RW_ResetCounters_t;
 
 typedef struct
 {
-    double momentum;
+    double momentum[3];
 } GENERIC_RW_Data;
 
 

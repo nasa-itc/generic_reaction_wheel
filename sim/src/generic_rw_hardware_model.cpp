@@ -80,6 +80,8 @@ namespace Nos3
         std::string dp_name = config.get("simulator.hardware-model.data-provider.type", "GENERICRWSIMDATA42SOCKETPROVIDER");
         _sdp = SimDataProviderFactory::Instance().Create(dp_name, config);
 
+        _wheel_number = config.get("simulator.hardware-model.data-provider.reactionwheel", 0);
+
         //_prev_data_sent_time = _absolute_start_time + 10.0;
         //_time_bus->add_time_tick_callback(std::bind(&GenericRWHardwareModel::send_periodic_data, this, std::placeholders::_1));
 
@@ -136,7 +138,7 @@ namespace Nos3
                 sim_logger->error("Invalid torque command value");
             }
             std::stringstream ss;
-            ss << "SC[0].AC.Whl[0].Tcmd = ";
+            ss << "SC[0].AC.Whl[" << _wheel_number << "].Tcmd = ";
             ss << torque;
 
             dynamic_cast<GenericRWData42SocketProvider*>(_sdp)->send_command_to_socket(ss.str());
