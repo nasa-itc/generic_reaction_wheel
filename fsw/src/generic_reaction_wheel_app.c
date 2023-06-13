@@ -121,8 +121,8 @@ int32 GENERIC_RW_AppInit( void )
     /*
     ** Initialize app command execution counters
     */
-    GENERIC_RW_AppData.CmdCounter = 0;
-    GENERIC_RW_AppData.ErrCounter = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter = 0;
 
     /*
     ** Initialize app configuration data
@@ -132,29 +132,9 @@ int32 GENERIC_RW_AppInit( void )
     strcpy(GENERIC_RW_AppData.PipeName, "GEN_RW_CMD_PIPE");
 
     /*
-    ** Initialize event filter table...
-    */
-    GENERIC_RW_AppData.EventFilters[0].EventID = GENERIC_RW_STARTUP_INF_EID;
-    GENERIC_RW_AppData.EventFilters[0].Mask    = 0x0000;
-    GENERIC_RW_AppData.EventFilters[1].EventID = GENERIC_RW_COMMAND_ERR_EID;
-    GENERIC_RW_AppData.EventFilters[1].Mask    = 0x0000;
-    GENERIC_RW_AppData.EventFilters[2].EventID = GENERIC_RW_COMMANDNOP_INF_EID;
-    GENERIC_RW_AppData.EventFilters[2].Mask    = 0x0000;
-    GENERIC_RW_AppData.EventFilters[3].EventID = GENERIC_RW_COMMANDRST_INF_EID;
-    GENERIC_RW_AppData.EventFilters[3].Mask    = 0x0000;
-    GENERIC_RW_AppData.EventFilters[4].EventID = GENERIC_RW_INVALID_MSGID_ERR_EID;
-    GENERIC_RW_AppData.EventFilters[4].Mask    = 0x0000;
-    GENERIC_RW_AppData.EventFilters[5].EventID = GENERIC_RW_LEN_ERR_EID;
-    GENERIC_RW_AppData.EventFilters[5].Mask    = 0x0000;
-    GENERIC_RW_AppData.EventFilters[6].EventID = GENERIC_RW_PIPE_ERR_EID;
-    GENERIC_RW_AppData.EventFilters[6].Mask    = 0x0000;
-
-    /*
     ** Register the events
     */
-    status = CFE_EVS_Register(GENERIC_RW_AppData.EventFilters,
-                              GENERIC_RW_EVENT_COUNTS,
-                              CFE_EVS_EventFilter_BINARY);
+    status = CFE_EVS_Register(NULL, 0, CFE_EVS_EventFilter_BINARY);
     if (status != CFE_SUCCESS)
     {
         CFE_ES_WriteToSysLog("GENERIC_RW App: Error Registering Events, RC = 0x%08lX\n",
@@ -365,7 +345,7 @@ int32 GENERIC_RW_ReportHousekeeping(void)
 int32 GENERIC_RW_Noop( const GENERIC_RW_Noop_t *Msg )
 {
 
-    GENERIC_RW_AppData.CmdCounter++;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
 
     CFE_EVS_SendEvent(GENERIC_RW_COMMANDNOP_INF_EID,
                       CFE_EVS_EventType_INFORMATION,
@@ -390,8 +370,8 @@ int32 GENERIC_RW_Noop( const GENERIC_RW_Noop_t *Msg )
 int32 GENERIC_RW_ResetCounters( const GENERIC_RW_ResetCounters_t *Msg )
 {
 
-    GENERIC_RW_AppData.CmdCounter = 0;
-    GENERIC_RW_AppData.ErrCounter = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter = 0;
 
     CFE_EVS_SendEvent(GENERIC_RW_COMMANDRST_INF_EID,
                       CFE_EVS_EventType_INFORMATION,
@@ -411,7 +391,7 @@ int32 GENERIC_RW_Current_Momentum( const GENERIC_RW_Noop_t *Msg )
     int32_t status;
     double momentum;
 
-    GENERIC_RW_AppData.CmdCounter++;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
     CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_DEBUG,"Request Generic Reaction Wheel Data");
 
     /* Read data from the UARTs for all 3 wheels */
@@ -478,7 +458,7 @@ int32 GENERIC_RW_Set_Torque( const GENERIC_RW_Cmd_t *Msg )
     double torque;
     char request[22];
 
-    GENERIC_RW_AppData.CmdCounter++;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
     GENERIC_RW_Cmd_t *cmd;
     cmd = (GENERIC_RW_Cmd_t*)Msg;
     CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_DEBUG, 
@@ -537,7 +517,7 @@ bool GENERIC_RW_VerifyCmdLength( CFE_SB_MsgPtr_t Msg, uint16 ExpectedLength )
 
         result = false;
 
-        GENERIC_RW_AppData.ErrCounter++;
+        GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter++;
     }
 
     return( result );

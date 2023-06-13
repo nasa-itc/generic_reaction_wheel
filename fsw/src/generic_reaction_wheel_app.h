@@ -37,12 +37,6 @@
 typedef struct
 {
     /*
-    ** Command interface counters...
-    */
-    uint8                 CmdCounter;
-    uint8                 ErrCounter;
-
-    /*
     ** Housekeeping telemetry packet...
     */
     GENERIC_RW_HkTlm_t  HkTlm;
