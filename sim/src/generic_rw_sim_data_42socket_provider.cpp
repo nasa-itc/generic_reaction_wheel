@@ -38,7 +38,7 @@ namespace Nos3
             "configuration:\n%s", oss.str().c_str());
 
 //        connect_reader_thread_as_42_socket_client(config.get("simulator.hardware-model.data-provider.hostname", "localhost"),
-        connect_reader_thread_as_42_socket_client(config.get("simulator.hardware-model.data-provider.hostname", "0.0.0.0"),
+        connect_reader_thread_as_42_socket_client(config.get("simulator.hardware-model.data-provider.hostname", "fortytwo"),
             config.get("simulator.hardware-model.data-provider.port", 4242));
         _sc = config.get("simulator.hardware-model.data-provider.spacecraft", 0);
         _reactionwheel = config.get("simulator.hardware-model.data-provider.reactionwheel", 0);
