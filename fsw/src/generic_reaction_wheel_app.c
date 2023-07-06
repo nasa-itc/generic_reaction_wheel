@@ -421,16 +421,16 @@ static int32_t GetCurrentMomentum(int wheel_number, double *momentum)
     char *reply;
 
     char *request = "CURRENT_MOMENTUM";
-    int32_t status = uart_write_port(RW_UART[wheel_number].handle, (uint8_t*)request, strlen(request));
+    int32_t status = uart_write_port(&RW_UART[wheel_number], (uint8_t*)request, strlen(request));
     if (status < 0) {
         CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_ERROR, "GetCurrentMomentum: Error writing to UART=%d\n", status);
     }
     /* check how many bytes are waiting on the uart */
-    DataLen = uart_bytes_available(RW_UART[wheel_number].handle);
+    DataLen = uart_bytes_available(&RW_UART[wheel_number]);
     if (DataLen > 0)
     {
         /* grab the bytes */
-        status = uart_read_port(RW_UART[wheel_number].handle, DataBuffer, DataLen);
+        status = uart_read_port(&RW_UART[wheel_number], DataBuffer, DataLen);
         if (status < 0) {
             CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_ERROR, "GetCurrentMomentum: Error reading from UART=%d\n", status);
         } else {
@@ -467,7 +467,7 @@ int32 GENERIC_RW_Set_Torque( const GENERIC_RW_Cmd_t *Msg )
     torque /= 10000.0; // units are 10^-4 Newton-meters (so we don't have to send floats in the command)
 
     sprintf(request, "SET_TORQUE=%10.4f", torque);
-    status = uart_write_port(RW_UART[cmd->wheel_number].handle, (uint8_t*)request, strlen(request));
+    status = uart_write_port(&RW_UART[cmd->wheel_number], (uint8_t*)request, strlen(request));
     //OS_printf("Generic Reaction Wheel: Sending command:%s\n", request);
     if (status < 0) {
         CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_ERROR, "Generic Reaction Wheel: Error writing to UART=%d\n", status);
@@ -476,10 +476,10 @@ int32 GENERIC_RW_Set_Torque( const GENERIC_RW_Cmd_t *Msg )
         uint8_t DataBuffer[1024];
         int32 DataLen;
         /* check how many bytes are waiting on the uart */
-        DataLen = uart_bytes_available(RW_UART[cmd->wheel_number].handle);
+        DataLen = uart_bytes_available(&RW_UART[cmd->wheel_number]);
         if (DataLen > 0)
         {
-            uart_read_port(RW_UART[cmd->wheel_number].handle, DataBuffer, DataLen);
+            uart_read_port(&RW_UART[cmd->wheel_number], DataBuffer, DataLen);
             DataBuffer[DataLen] = 0; // Ensure null termination
             //OS_printf("Generic Reaction Wheel: Response on UART=%s\n", (char *)DataBuffer);
         }
