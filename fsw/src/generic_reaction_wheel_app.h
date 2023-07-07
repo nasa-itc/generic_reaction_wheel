@@ -50,7 +50,7 @@ typedef struct
     ** Operational data (not reported in housekeeping)...
     */
     CFE_SB_PipeId_t    CommandPipe;
-    CFE_SB_MsgPtr_t    MsgPtr;
+    CFE_MSG_Message_t *    MsgPtr;
 
     /*
     ** Initialization data (not reported in housekeeping)...
@@ -66,19 +66,19 @@ typedef struct
 /*
 ** Local function prototypes.
 **
-** Note: Except for the entry point (GENERIC_RW_AppMain), these
+** Note: Except for the entry point (RW_AppMain), these
 **       functions are not called from any other source module.
 */
-void  GENERIC_RW_AppMain(void);
+void  RW_AppMain(void);
 int32 GENERIC_RW_AppInit(void);
-void  GENERIC_RW_ProcessCommandPacket(CFE_SB_MsgPtr_t Msg);
-void  GENERIC_RW_ProcessGroundCommand(CFE_SB_MsgPtr_t Msg);
+void  GENERIC_RW_ProcessCommandPacket(CFE_MSG_Message_t * Msg);
+void  GENERIC_RW_ProcessGroundCommand(CFE_MSG_Message_t * Msg);
 int32 GENERIC_RW_ReportHousekeeping(void);
 int32 GENERIC_RW_ResetCounters(const GENERIC_RW_ResetCounters_t *Msg);
 int32 GENERIC_RW_Noop(const GENERIC_RW_Noop_t *Msg);
 int32 GENERIC_RW_Current_Momentum(const GENERIC_RW_Noop_t *Msg );
 int32 GENERIC_RW_Set_Torque(const GENERIC_RW_Cmd_t *Msg);
 
-bool  GENERIC_RW_VerifyCmdLength(CFE_SB_MsgPtr_t Msg, uint16 ExpectedLength);
+bool  GENERIC_RW_VerifyCmdLength(CFE_MSG_Message_t * Msg, uint16 ExpectedLength);
 
 #endif /* _generic_reaction_wheel_app_h_ */
