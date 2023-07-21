@@ -29,10 +29,28 @@ namespace Nos3
     //}
 
     GenericRWDataPoint::GenericRWDataPoint(int16_t spacecraft, int16_t reactionwheel, const boost::shared_ptr<Sim42DataPoint> dp) : 
-        _dp(*dp), _sc(spacecraft), _reactionwheel(reactionwheel), _not_parsed(true) 
+        _dp(*dp), _sc(spacecraft), _reactionwheel(reactionwheel) 
     {
-        sim_logger->trace("GPSSimDataPoint::GPSSimDataPoint:  Created instance using _sc=%d, _gps=%d, _dp=%s", 
+        sim_logger->trace("GPSSimDataPoint::GPSSimDataPoint:  Created instance using _sc=%d, _reactionwheel=%d, _dp=%s", 
             _sc, _reactionwheel, _dp.to_string().c_str());
+        
+        /* Initialize data */
+        _momentum = 0;
+        try {
+            /*
+            ** Declare 42 telemetry string prefix
+            ** 42 variables defined in `42/Include/42types.h`
+            ** 42 data stream defined in `42/Source/IPC/SimWriteToSocket.c`
+            */
+            // SC[N].AC.Whl[M].H
+            std::string key;
+            key.append("SC[").append(std::to_string(spacecraft)).append("].AC.Whl[").append(std::to_string(reactionwheel)).append("].H");
+
+            _momentum = std::stof(dp->get_value_for_key(key));
+        } catch (const std::exception& e) {
+            sim_logger->error("GenericRWDataPoint::GenericRWDataPoint:  Parsing exception %s", e.what());
+        }
+
     }
 
     GenericRWDataPoint::~GenericRWDataPoint(void)
@@ -40,41 +58,8 @@ namespace Nos3
         sim_logger->trace("GenericRWDataPoint::~GenericRWDataPoint:  Destructor executed");
     }
 
-    void GenericRWDataPoint::do_parsing(void) const
-    {
-        std::ostringstream MatchString;
-        MatchString << "SC[" << _sc << "].AC.Whl[" << _reactionwheel << "].";
-        size_t MSsize = MatchString.str().size();
-
-        _not_parsed = false;
-        
-        std::vector<std::string> lines = _dp.get_lines();
-        
-        try {
-            for (unsigned int i = 0; i < lines.size(); i++) {
-                if (lines[i].compare(0, MSsize, MatchString.str()) == 0) { // e.g. SC[0].AC.Whl[0]
-                    sim_logger->trace("GenericRWDataPoint::do_parsing:  Found a string with the correct prefix = %s.  String:  %s", MatchString.str().c_str(), lines[i].c_str());
-                    // Whl. H (momentum)
-                    if (lines[i].compare(MSsize, 2, "H ") == 0) {
-                        size_t found = lines[i].find_first_of("=");
-                        _momentum = std::stod(lines[i].substr(found+1, lines[i].size() - found - 1));
-                        sim_logger->trace("GenericRWDataPoint::do_parsing:  Parsed Momentum.  = found at %d, rhs=%s, _momentum=%f", 
-                            found, lines[i].substr(found+1, lines[i].size() - found - 1).c_str(), _momentum);
-                    }
-                }
-            }
-        } catch(const std::exception& e) {
-            sim_logger->error("GenericRWDataPoint::do_parsing:  Parsing exception:  %s", e.what());
-        }
-                
-        sim_logger->trace("GenericRWDataPoint::do_parsing:  Parsed data point:\n%s", to_string().c_str());
-
-    }
-
     std::string GenericRWDataPoint::to_string(void) const
-    {
-        parse_data_point();
-        
+    {        
         std::stringstream ss;
 
         ss << std::fixed << std::setfill(' ');
