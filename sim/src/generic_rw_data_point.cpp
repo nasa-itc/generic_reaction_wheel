@@ -46,7 +46,7 @@ namespace Nos3
             std::string key;
             key.append("SC[").append(std::to_string(spacecraft)).append("].AC.Whl[").append(std::to_string(reactionwheel)).append("].H");
 
-            _momentum = std::stof(dp->get_value_for_key(key));
+            _momentum = std::stod(dp->get_value_for_key(key));
         } catch (const std::exception& e) {
             sim_logger->error("GenericRWDataPoint::GenericRWDataPoint:  Parsing exception %s", e.what());
         }
