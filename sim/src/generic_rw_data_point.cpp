@@ -33,9 +33,12 @@ namespace Nos3
     {
         sim_logger->trace("GPSSimDataPoint::GPSSimDataPoint:  Created instance using _sc=%d, _reactionwheel=%d, _dp=%s", 
             _sc, _reactionwheel, _dp.to_string().c_str());
-        
         /* Initialize data */
         _momentum = 0;
+    }
+
+    void GenericRWDataPoint::do_parsing(void) const  
+    { 
         try {
             /*
             ** Declare 42 telemetry string prefix
@@ -44,9 +47,9 @@ namespace Nos3
             */
             // SC[N].AC.Whl[M].H
             std::string key;
-            key.append("SC[").append(std::to_string(spacecraft)).append("].AC.Whl[").append(std::to_string(reactionwheel)).append("].H");
+            key.append("SC[").append(std::to_string(_sc)).append("].AC.Whl[").append(std::to_string(_reactionwheel)).append("].H");
 
-            _momentum = std::stod(dp->get_value_for_key(key));
+            _momentum = std::stod(_dp.get_value_for_key(key));
         } catch (const std::exception& e) {
             sim_logger->error("GenericRWDataPoint::GenericRWDataPoint:  Parsing exception %s", e.what());
         }

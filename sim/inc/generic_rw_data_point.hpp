@@ -33,13 +33,18 @@ namespace Nos3
         ~GenericRWDataPoint(void);
         std::string to_string(void) const;
 
-        double get_momentum(void) const {return _momentum;}
+        double get_momentum(void) const {parse_data_point(); return _momentum;}
     private:
+        // Private mutators
+        inline void parse_data_point(void) const {if (_not_parsed) do_parsing();}
+        void do_parsing(void) const;
+
         // Private data
-        Sim42DataPoint _dp;
+        mutable Sim42DataPoint _dp;
         int16_t _sc;
         int16_t _reactionwheel;
         // mutable below so parsing can be on demand:
+        mutable bool _not_parsed;
         mutable double _momentum; // Momentum - Nms
     };
 }
