@@ -40,7 +40,7 @@ namespace Nos3
         void do_parsing(void) const;
 
         // Private data
-        Sim42DataPoint _dp;
+        mutable Sim42DataPoint _dp;
         int16_t _sc;
         int16_t _reactionwheel;
         // mutable below so parsing can be on demand:
