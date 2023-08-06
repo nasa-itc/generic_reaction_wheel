@@ -27,16 +27,18 @@
 */
 typedef struct
 {
-   uint8    CmdHeader[CFE_SB_CMD_HDR_SIZE];
+    CFE_MSG_CommandHeader_t CmdHeader;
 
 } GENERIC_RW_NoArgsCmd_t;
 
 typedef struct
 {
-    uint8  CmdHeader[CFE_SB_CMD_HDR_SIZE];
+    CFE_MSG_CommandHeader_t CmdHeader;
+    uint8  wheel_number;
     int16  data;
 
-} GENERIC_RW_Cmd_t;
+} __attribute__((packed)) GENERIC_RW_Cmd_t;
+#define GENERIC_RW_CMD_LEN sizeof(GENERIC_RW_Cmd_t)
 
 /*
 ** The following commands all share the "NoArgs" format
@@ -55,7 +57,7 @@ typedef GENERIC_RW_NoArgsCmd_t      GENERIC_RW_ResetCounters_t;
 
 typedef struct
 {
-    double momentum;
+    double momentum[3];
 } GENERIC_RW_Data;
 
 
@@ -64,14 +66,14 @@ typedef struct
     uint8              CommandErrorCounter;
     uint8              CommandCounter;
     GENERIC_RW_Data    data;
-} OS_PACK GENERIC_RW_HkTlm_Payload_t;
+} __attribute__((packed)) GENERIC_RW_HkTlm_Payload_t;
 
 typedef struct
 {
-    uint8                       TlmHeader[CFE_SB_TLM_HDR_SIZE];
+    CFE_MSG_TelemetryHeader_t TlmHeader;
     GENERIC_RW_HkTlm_Payload_t  Payload;
 
-} OS_PACK GENERIC_RW_HkTlm_t;
+} __attribute__((packed)) GENERIC_RW_HkTlm_t;
 
 #endif /* _generic_reaction_wheel_app_msg_h_ */
 

@@ -48,6 +48,7 @@ namespace Nos3
         std::unique_ptr<NosEngine::Uart::Uart>  _uart_connection;
         double                                  _prev_data_sent_time = 0;
         double                                  _period = 0.1;
+        int                                     _wheel_number;
     };
 }
 
