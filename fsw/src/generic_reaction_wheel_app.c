@@ -504,7 +504,7 @@ bool GENERIC_RW_VerifyCmdLength( CFE_MSG_Message_t * Msg, uint16 ExpectedLength 
 
         CFE_EVS_SendEvent(GENERIC_RW_LEN_ERR_EID,
                           CFE_EVS_EventType_ERROR,
-                          "Invalid Msg length: ID = 0x%X,  CC = %d, Len = %d, Expected = %d",
+                          "Invalid Msg length: ID = 0x%X,  CC = %d, Len = %ld, Expected = %d",
                           CFE_SB_MsgIdToValue(MessageID),
                           CommandCode,
                           ActualLength,
