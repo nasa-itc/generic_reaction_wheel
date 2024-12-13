@@ -23,6 +23,7 @@
 #include "generic_reaction_wheel_perfids.h"
 #include "generic_reaction_wheel_msgids.h"
 #include "generic_reaction_wheel_msg.h"
+#include "generic_reaction_wheel_device.h"
 
 /***********************************************************************/
 #define GENERIC_RW_PIPE_DEPTH                     32 /* Depth of the Command Pipe for Application */
