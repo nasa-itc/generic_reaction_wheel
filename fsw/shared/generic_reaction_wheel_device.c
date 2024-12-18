@@ -65,7 +65,7 @@ int32_t SetRWTorque( uint8_t wheel_num, double torque )
     } else {
         /* Read the reply */
         uint8_t DataBuffer[1024];
-        int32 DataLen;
+        int32_t DataLen;
         /* check how many bytes are waiting on the uart */
         DataLen = uart_bytes_available(&RW_UART[wheel_num]);
         if (DataLen > 0)

@@ -15,11 +15,7 @@
 /*
 ** Global Variables
 */
-static uart_info_t RW_UART[3] = {
-    {.deviceString = &GENERIC_REACTION_WHEEL_1_CFG_STRING[0], .handle = GENERIC_REACTION_WHEEL_1_CFG_HANDLE, .isOpen = GENERIC_REACTION_WHEEL_1_CFG_IS_OPEN, .baud = GENERIC_REACTION_WHEEL_1_CFG_BAUDRATE_HZ},
-    {.deviceString = &GENERIC_REACTION_WHEEL_2_CFG_STRING[0], .handle = GENERIC_REACTION_WHEEL_2_CFG_HANDLE, .isOpen = GENERIC_REACTION_WHEEL_2_CFG_IS_OPEN, .baud = GENERIC_REACTION_WHEEL_2_CFG_BAUDRATE_HZ},
-    {.deviceString = &GENERIC_REACTION_WHEEL_3_CFG_STRING[0], .handle = GENERIC_REACTION_WHEEL_3_CFG_HANDLE, .isOpen = GENERIC_REACTION_WHEEL_3_CFG_IS_OPEN, .baud = GENERIC_REACTION_WHEEL_3_CFG_BAUDRATE_HZ},
-};
+
 double RwData;
 
 /*
@@ -94,12 +90,12 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
             exit_status = OS_ERROR;
             break;
 
-        case CMD_:
+        case CMD_GET_MOMENTUM:
             if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
             {
                 for ( int i = 0; i < sizeof(RW_UART); i++)
                 {
-                    status = GetCurrentMomentum(&RW_UART[1], &RwData);
+                    status = GetCurrentMomentum(i, &RwData);
                     if (status == OS_SUCCESS)
                     {
                         OS_printf("RW_GetCurrentMomentum: Success! Momentum: %d\n", &RwData);
@@ -207,9 +203,9 @@ int main(int argc, char *argv[])
     }
 
     // Close the devices
-    if (int i = 0; i < sizeof(RW_UART); i++)
+    for ( int i = 0; i < sizeof(RW_UART); i++ )
     {
-        uart_close_port(RW_UART[i]);
+        uart_close_port(&RW_UART[i]);
     }
 
     #ifdef _NOS_ENGINE_LINK_
