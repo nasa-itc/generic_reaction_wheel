@@ -15,8 +15,12 @@
 /*
 ** Global Variables
 */
-
-double RwData;
+static uart_info_t RW_UART[3] = {
+    {.deviceString = &GENERIC_REACTION_WHEEL_1_CFG_STRING[0], .handle = GENERIC_REACTION_WHEEL_1_CFG_HANDLE, .isOpen = GENERIC_REACTION_WHEEL_1_CFG_IS_OPEN, .baud = GENERIC_REACTION_WHEEL_1_CFG_BAUDRATE_HZ},
+    {.deviceString = &GENERIC_REACTION_WHEEL_2_CFG_STRING[0], .handle = GENERIC_REACTION_WHEEL_2_CFG_HANDLE, .isOpen = GENERIC_REACTION_WHEEL_2_CFG_IS_OPEN, .baud = GENERIC_REACTION_WHEEL_2_CFG_BAUDRATE_HZ},
+    {.deviceString = &GENERIC_REACTION_WHEEL_3_CFG_STRING[0], .handle = GENERIC_REACTION_WHEEL_3_CFG_HANDLE, .isOpen = GENERIC_REACTION_WHEEL_3_CFG_IS_OPEN, .baud = GENERIC_REACTION_WHEEL_3_CFG_BAUDRATE_HZ},
+};
+int32_t RwData;
 
 /*
 ** Component Functions
@@ -77,7 +81,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
 {
     int32_t status = OS_SUCCESS;
     int32_t exit_status = OS_SUCCESS;
-    int32_t torque;
+    uint32_t torque;
 
     /* Process command */
     switch(cc) 
@@ -93,16 +97,16 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
         case CMD_GET_MOMENTUM:
             if (check_number_arguments(num_tokens, 0) == OS_SUCCESS)
             {
-                for ( int i = 0; i < sizeof(RW_UART); i++)
+                for ( int i = 0; i < 3; i++)
                 {
-                    status = GetCurrentMomentum(i, &RwData);
-                    if (status == OS_SUCCESS)
+                    status = GetCurrentMomentum(&RW_UART[i], &RwData);
+                    if (status < 0)
                     {
-                        OS_printf("RW_GetCurrentMomentum: Success! Momentum: %d\n", &RwData);
+                        OS_printf("GENERIC_REACTION_WHEEL_RequestData command failed for RW %d!\n", i);
                     }
                     else
                     {
-                        OS_printf("GENERIC_REACTION_WHEEL_RequestData command failed!\n");
+                        OS_printf("RW_GetCurrentMomentum: Success for RW %d! Momentum: %ld\n", i, RwData);
                     }
                 }
             }
@@ -111,18 +115,18 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
         case CMD_SET_TORQUE:
             if (check_number_arguments(num_tokens, 3) == OS_SUCCESS)
             {
-                for (uint8_t i = 0; i < sizeof(RW_UART); i++)
+                for (int i = 0; i < 3; i++)
                 {
-                torque = atoi(tokens[i]);
-                status = SetRWTorque(i, torque);
-                if (status == OS_SUCCESS)
-                {
-                    OS_printf("RW %d torque successfully set to %d\n", i, torque);
-                }
-                else
-                {
-                    OS_printf("Configuration command failed!\n");
-                }
+                    torque = atoi(tokens[i]);
+                    status = SetRWTorque(&RW_UART[i], torque);
+                    if (status < 0)
+                    {   
+                        OS_printf("GENERIC_REACTION_WHEEL_SetTorque command failed for RW %d!\n", i);
+                    }
+                    else
+                    {
+                        OS_printf("RW %d torque successfully set to %ld\n", i, torque);
+                    }
                 }
             }
             break;
@@ -150,21 +154,22 @@ int main(int argc, char *argv[])
         nos_init_link();
     #endif
 
-    /* Open device specific protocols */
-    for (int i = 0; i < sizeof(RW_UART); i++)
+     /* Connect to the UART */
+    status = uart_init_port(&RW_UART[0]);
+    if(status != OS_SUCCESS)
     {
-        status = uart_init_port(&RW_UART[i]);
-
-        if (status == OS_SUCCESS)
-        {
-            printf("UART device %s configured with baudrate %d \n", RW_UART[i].deviceString, RW_UART[i].baud);
-        }
-        else
-        {
-            printf("UART device %s failed to initialize! \n", RW_UART[i].deviceString);
-            run_status = OS_ERROR;
-        }
-    }
+    	OS_printf("GENERIC_RW Checkout: UART 0 port initialization error!\n");
+    }    
+    status = uart_init_port(&RW_UART[1]);
+    if(status != OS_SUCCESS)
+    {
+    	OS_printf("GENERIC_RW Checkout: UART 1 port initialization error!\n");
+    }    
+    status = uart_init_port(&RW_UART[2]);
+    if(status != OS_SUCCESS)
+    {
+    	OS_printf("GENERIC_RW Checkout: UART 2 port initialization error!\n");
+    }    
 
     /* Main loop */
     print_help();
@@ -203,7 +208,7 @@ int main(int argc, char *argv[])
     }
 
     // Close the devices
-    for ( int i = 0; i < sizeof(RW_UART); i++ )
+    for ( int i = 0; i < 3; i++ )
     {
         uart_close_port(&RW_UART[i]);
     }

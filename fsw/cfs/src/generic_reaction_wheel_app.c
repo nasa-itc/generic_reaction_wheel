@@ -22,6 +22,15 @@
 */
 GENERIC_RW_AppData_t GENERIC_RW_AppData;
 
+static char deviceName0[] = "/dev/tty2";
+static char deviceName1[] = "/dev/tty3";
+static char deviceName2[] = "/dev/tty4";
+static uart_info_t RW_UART[3] = {
+    {.deviceString = &deviceName0[0], .handle = 2, .isOpen = PORT_CLOSED, .baud = 115200},
+    {.deviceString = &deviceName1[0], .handle = 3, .isOpen = PORT_CLOSED, .baud = 115200},
+    {.deviceString = &deviceName2[0], .handle = 4, .isOpen = PORT_CLOSED, .baud = 115200},
+};
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * *  * * * * **/
 /* GENERIC_RW_AppMain() -- Application entry point and main process loop      */
 /*                                                                            */
@@ -376,7 +385,7 @@ int32 GENERIC_RW_Current_Momentum( const GENERIC_RW_Noop_t *Msg )
 
     /* Read data from the UARTs for all 3 wheels */
     for (int i = 0; i < 3; i++) {
-        status = GetCurrentMomentum(i, &momentum);
+        status = GetCurrentMomentum(&RW_UART[i], &momentum);
         //OS_printf("GENERIC_RW: GetCurrentMomentum:  status=%d, momentum=%f\n", status, momentum);
         if (status > 0) {
             GENERIC_RW_AppData.HkTlm.Payload.data.momentum[i] = momentum;
@@ -412,7 +421,7 @@ int32_t GENERIC_RW_Set_Torque( const GENERIC_RW_Cmd_t *Msg )
 
     wheel_num = cmd->wheel_number;
 
-    status = SetRWTorque(wheel_num, torque);
+    status = SetRWTorque(&RW_UART[wheel_num], torque);
 
     if (status < 0)
     {
