@@ -1,3 +1,0 @@
-/home/jstar/Desktop/github-nos3/components/generic_reaction_wheel/fsw/standalone/build/CMakeFiles/generic_reaction_wheel_checkout.dir
-/home/jstar/Desktop/github-nos3/components/generic_reaction_wheel/fsw/standalone/build/CMakeFiles/edit_cache.dir
-/home/jstar/Desktop/github-nos3/components/generic_reaction_wheel/fsw/standalone/build/CMakeFiles/rebuild_cache.dir
