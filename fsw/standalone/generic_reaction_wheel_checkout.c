@@ -20,7 +20,7 @@ static uart_info_t RW_UART[3] = {
     {.deviceString = &GENERIC_REACTION_WHEEL_2_CFG_STRING[0], .handle = GENERIC_REACTION_WHEEL_2_CFG_HANDLE, .isOpen = GENERIC_REACTION_WHEEL_2_CFG_IS_OPEN, .baud = GENERIC_REACTION_WHEEL_2_CFG_BAUDRATE_HZ},
     {.deviceString = &GENERIC_REACTION_WHEEL_3_CFG_STRING[0], .handle = GENERIC_REACTION_WHEEL_3_CFG_HANDLE, .isOpen = GENERIC_REACTION_WHEEL_3_CFG_IS_OPEN, .baud = GENERIC_REACTION_WHEEL_3_CFG_BAUDRATE_HZ},
 };
-int32_t RwData;
+double RwData;
 
 /*
 ** Component Functions
@@ -81,7 +81,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
 {
     int32_t status = OS_SUCCESS;
     int32_t exit_status = OS_SUCCESS;
-    uint32_t torque;
+    double torque;
 
     /* Process command */
     switch(cc) 
@@ -106,7 +106,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
                     }
                     else
                     {
-                        OS_printf("RW_GetCurrentMomentum: Success for RW %d! Momentum: %ld\n", i, RwData);
+                        OS_printf("RW_GetCurrentMomentum: Success for RW %d! Momentum: %lf\n", i, RwData);
                     }
                 }
             }
@@ -117,7 +117,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
             {
                 for (int i = 0; i < 3; i++)
                 {
-                    torque = atoi(tokens[i]);
+                    torque = atof(tokens[i]);
                     status = SetRWTorque(&RW_UART[i], torque);
                     if (status < 0)
                     {   
@@ -125,7 +125,7 @@ int process_command(int cc, int num_tokens, char tokens[MAX_INPUT_TOKENS][MAX_IN
                     }
                     else
                     {
-                        OS_printf("RW %d torque successfully set to %ld\n", i, torque);
+                        OS_printf("RW %d torque successfully set to %lf\n", i, torque);
                     }
                 }
             }
