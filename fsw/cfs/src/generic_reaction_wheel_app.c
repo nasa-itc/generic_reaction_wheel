@@ -31,9 +31,6 @@ static uart_info_t RW_UART[3] = {
     {.deviceString = &deviceName2[0], .handle = 4, .isOpen = PORT_CLOSED, .baud = 115200},
 };
 
-/* Forward declarations */
-static int32_t GetCurrentMomentum(int wheel_number, double *momentum);
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * *  * * * * **/
 /* GENERIC_RW_AppMain() -- Application entry point and main process loop      */
 /*                                                                            */
@@ -213,10 +210,10 @@ int32 GENERIC_RW_AppInit( void )
 } /* End of GENERIC_RW_AppInit() */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
-/*  Name:  GENERIC_RW_ProcessCommandPacket                                        */
+/*  Name:  GENERIC_RW_ProcessCommandPacket                                    */
 /*                                                                            */
 /*  Purpose:                                                                  */
-/*     This routine will process any packet that is received on the GENERIC_RW    */
+/*     This routine will process any packet that is received on the GENERIC_RW*/
 /*     command pipe.                                                          */
 /*                                                                            */
 /* * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * *  * *  * * * * */
@@ -388,12 +385,12 @@ int32 GENERIC_RW_Current_Momentum( const GENERIC_RW_Noop_t *Msg )
 
     /* Read data from the UARTs for all 3 wheels */
     for (int i = 0; i < 3; i++) {
-        status = GetCurrentMomentum(i, &momentum);
+        status = GetCurrentMomentum(&RW_UART[i], &momentum);
         //OS_printf("GENERIC_RW: GetCurrentMomentum:  status=%d, momentum=%f\n", status, momentum);
         if (status > 0) {
             GENERIC_RW_AppData.HkTlm.Payload.data.momentum[i] = momentum;
         } else {
-            CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_EventType_ERROR,"Request Generic Reaction Wheel Data - Error reading momentum");
+            CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_EventType_ERROR,"Request Generic Reaction Wheel Data - Error reading momentum. Status: %d", status);
         }
     }
 
@@ -403,52 +400,16 @@ int32 GENERIC_RW_Current_Momentum( const GENERIC_RW_Noop_t *Msg )
     return CFE_SUCCESS;
 } /* End of GENERIC_RW_Current_Momentum */
 
-/************************************************************************
-** Get current momentum data from the UART
-*************************************************************************/
-static int32_t GetCurrentMomentum(int wheel_number, double *momentum)
-{
-    uint8_t DataBuffer[1024];
-    int32 DataLen;
-    char *reply;
-
-    char *request = "CURRENT_MOMENTUM";
-    int32_t status = uart_write_port(&RW_UART[wheel_number], (uint8_t*)request, strlen(request));
-    if (status < 0) {
-        CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_EventType_ERROR, "GetCurrentMomentum: Error writing to UART=%d\n", status);
-    }
-    /* check how many bytes are waiting on the uart */
-    DataLen = uart_bytes_available(&RW_UART[wheel_number]);
-    if (DataLen > 0)
-    {
-        /* grab the bytes */
-        status = uart_read_port(&RW_UART[wheel_number], DataBuffer, DataLen);
-        if (status < 0) {
-            CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_EventType_ERROR, "GetCurrentMomentum: Error reading from UART=%d\n", status);
-        } else {
-            DataBuffer[DataLen] = 0; // Ensure null termination
-            reply = (char *)DataBuffer;
-            if (strncmp(reply, "CURRENT_MOMENTUM=", 17) == 0) {
-                *momentum = atof(&reply[17]);
-            } else {
-                status = 0;
-            }
-        }
-    }
-
-    return status;
-}
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 /*                                                                            */
 /* GENERIC_RW_Noop -- GENERIC_RW Set Torque command                         */
 /*                                                                            */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
-int32 GENERIC_RW_Set_Torque( const GENERIC_RW_Cmd_t *Msg )
+int32_t GENERIC_RW_Set_Torque( const GENERIC_RW_Cmd_t *Msg )
 {
     int32_t status;
     double torque;
-    char request[22];
+    uint8_t wheel_num;
 
     GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
     GENERIC_RW_Cmd_t *cmd;
@@ -458,26 +419,16 @@ int32 GENERIC_RW_Set_Torque( const GENERIC_RW_Cmd_t *Msg )
     torque = cmd->data;
     torque /= 10000.0; // units are 10^-4 Newton-meters (so we don't have to send floats in the command)
 
-    sprintf(request, "SET_TORQUE=%10.4f", torque);
-    status = uart_write_port(&RW_UART[cmd->wheel_number], (uint8_t*)request, strlen(request));
-    //OS_printf("Generic Reaction Wheel: Sending command:%s\n", request);
-    if (status < 0) {
+    wheel_num = cmd->wheel_number;
+
+    status = SetRWTorque(&RW_UART[wheel_num], torque);
+
+    if (status < 0)
+    {
         CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_EventType_ERROR, "Generic Reaction Wheel: Error writing to UART=%d\n", status);
-    } else {
-        /* Read the reply */
-        uint8_t DataBuffer[1024];
-        int32 DataLen;
-        /* check how many bytes are waiting on the uart */
-        DataLen = uart_bytes_available(&RW_UART[cmd->wheel_number]);
-        if (DataLen > 0)
-        {
-            uart_read_port(&RW_UART[cmd->wheel_number], DataBuffer, DataLen);
-            DataBuffer[DataLen] = 0; // Ensure null termination
-            //OS_printf("Generic Reaction Wheel: Response on UART=%s\n", (char *)DataBuffer);
-        }
     }
 
-    return CFE_SUCCESS;
+    return status;
 } /* End of GENERIC_RW_Set_Torque */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
