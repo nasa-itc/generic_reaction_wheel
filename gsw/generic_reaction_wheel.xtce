@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xtce:SpaceSystem xmlns:xtce="http://www.omg.org/spec/XTCE/20180204" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="GENERIC_REACTION_WHEEL" xsi:schemaLocation="http://www.omg.org/spec/XTCE/20180204 https://www.omg.org/spec/XTCE/20180204/SpaceSystem.xsd">
+  <xtce:SpaceSystem name="GENRW_HK_TLM_T">
+    <xtce:TelemetryMetaData>
+      <xtce:ParameterTypeSet>
+        <xtce:IntegerParameterType name="ERROR_COUNT_Type" shortDescription="Error Count" signed="false">
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
+        </xtce:IntegerParameterType>
+        <xtce:IntegerParameterType name="COMMAND_COUNT_Type" shortDescription="Command Count" signed="false">
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
+        </xtce:IntegerParameterType>
+        <xtce:FloatParameterType name="MOMENTUM_NMS_0_Type" sizeInBits="64" shortDescription="Reaction Wheel 0 Momentum in Newton-meter-seconds">
+          <xtce:FloatDataEncoding sizeInBits="64" encoding="IEEE754_1985" byteOrder="leastSignificantByteFirst"/>
+        </xtce:FloatParameterType>
+        <xtce:FloatParameterType name="MOMENTUM_NMS_1_Type" sizeInBits="64" shortDescription="Reaction Wheel 1 Momentum in Newton-meter-seconds">
+          <xtce:FloatDataEncoding sizeInBits="64" encoding="IEEE754_1985" byteOrder="leastSignificantByteFirst"/>
+        </xtce:FloatParameterType>
+        <xtce:FloatParameterType name="MOMENTUM_NMS_2_Type" sizeInBits="64" shortDescription="Reaction Wheel 2 Momentum in Newton-meter-seconds">
+          <xtce:FloatDataEncoding sizeInBits="64" encoding="IEEE754_1985" byteOrder="leastSignificantByteFirst"/>
+        </xtce:FloatParameterType>
+      </xtce:ParameterTypeSet>
+      <xtce:ParameterSet>
+        <xtce:Parameter name="ERROR_COUNT" parameterTypeRef="ERROR_COUNT_Type"/>
+        <xtce:Parameter name="COMMAND_COUNT" parameterTypeRef="COMMAND_COUNT_Type"/>
+        <xtce:Parameter name="MOMENTUM_NMS_0" parameterTypeRef="MOMENTUM_NMS_0_Type"/>
+        <xtce:Parameter name="MOMENTUM_NMS_1" parameterTypeRef="MOMENTUM_NMS_1_Type"/>
+        <xtce:Parameter name="MOMENTUM_NMS_2" parameterTypeRef="MOMENTUM_NMS_2_Type"/>
+      </xtce:ParameterSet>
+      <xtce:ContainerSet>
+        <xtce:SequenceContainer name="GENRW_HK_TLM_T" shortDescription="Generic Reaction Wheel Application Housekeeping Telemetry Message">
+          <xtce:EntryList>
+            <xtce:ParameterRefEntry parameterRef="ERROR_COUNT"/>
+            <xtce:ParameterRefEntry parameterRef="COMMAND_COUNT"/>
+            <xtce:ParameterRefEntry parameterRef="MOMENTUM_NMS_0"/>
+            <xtce:ParameterRefEntry parameterRef="MOMENTUM_NMS_1"/>
+            <xtce:ParameterRefEntry parameterRef="MOMENTUM_NMS_2"/>
+          </xtce:EntryList>
+          <xtce:BaseContainer containerRef="/CCSDS/CCSDS_TM">
+            <xtce:RestrictionCriteria>
+              <xtce:ComparisonList>
+                <xtce:Comparison parameterRef="/CCSDS/CCSDS_STREAMID" value="2451"/>
+              </xtce:ComparisonList>
+            </xtce:RestrictionCriteria>
+          </xtce:BaseContainer>
+        </xtce:SequenceContainer>
+      </xtce:ContainerSet>
+    </xtce:TelemetryMetaData>
+  </xtce:SpaceSystem>
+  <xtce:SpaceSystem name="CMD">
+    <xtce:CommandMetaData>
+      <xtce:ArgumentTypeSet>
+        <xtce:IntegerArgumentType name="WHEEL_NUMBER_Type" initialValue="0" shortDescription="Wheel number to command" signed="false">
+          <xtce:IntegerDataEncoding sizeInBits="8" encoding="unsigned"/>
+          <xtce:ValidRange minInclusive="0" maxInclusive="2"/>
+        </xtce:IntegerArgumentType>
+        <xtce:IntegerArgumentType name="TORQUE_Type" initialValue="0" shortDescription="Torque to set in 10^-4 Newton-meters" signed="true">
+          <xtce:IntegerDataEncoding sizeInBits="16" encoding="twosComplement" byteOrder="leastSignificantByteFirst"/>
+          <xtce:ValidRange minInclusive="-32768" maxInclusive="32767"/>
+        </xtce:IntegerArgumentType>
+      </xtce:ArgumentTypeSet>
+      <xtce:MetaCommandSet>
+        <xtce:MetaCommand name="GENERIC_RW_SET_TORQUE_CC">
+          <xtce:BaseMetaCommand metaCommandRef="/CCSDS/CCSDS_TC">
+            <xtce:ArgumentAssignmentList>
+              <xtce:ArgumentAssignment argumentName="CCSDS_STREAMID" argumentValue="6546"/>
+              <xtce:ArgumentAssignment argumentName="CCSDS_FC" argumentValue="3"/>
+            </xtce:ArgumentAssignmentList>
+          </xtce:BaseMetaCommand>
+          <xtce:ArgumentList>
+            <xtce:Argument name="WHEEL_NUMBER" argumentTypeRef="WHEEL_NUMBER_Type"/>
+            <xtce:Argument name="TORQUE" argumentTypeRef="TORQUE_Type"/>
+          </xtce:ArgumentList>
+          <xtce:CommandContainer name="GENERIC_REACTION_WHEEL_GENERIC_RW_SET_TORQUE_CC_CommandContainer">
+            <xtce:EntryList>
+              <xtce:ArgumentRefEntry argumentRef="WHEEL_NUMBER"/>
+              <xtce:ArgumentRefEntry argumentRef="TORQUE"/>
+            </xtce:EntryList>
+          </xtce:CommandContainer>
+        </xtce:MetaCommand>
+        <xtce:MetaCommand name="GENERIC_RW_REQ_DATA_CC">
+          <xtce:BaseMetaCommand metaCommandRef="/CCSDS/CCSDS_TC">
+            <xtce:ArgumentAssignmentList>
+              <xtce:ArgumentAssignment argumentName="CCSDS_STREAMID" argumentValue="6546"/>
+              <xtce:ArgumentAssignment argumentName="CCSDS_FC" argumentValue="2"/>
+            </xtce:ArgumentAssignmentList>
+          </xtce:BaseMetaCommand>
+          <xtce:ArgumentList/>
+          <xtce:CommandContainer name="GENERIC_REACTION_WHEEL_GENERIC_RW_REQ_DATA_CC_CommandContainer">
+            <xtce:EntryList/>
+          </xtce:CommandContainer>
+        </xtce:MetaCommand>
+        <xtce:MetaCommand name="GENERIC_RW_RST_COUNTERS_CC">
+          <xtce:BaseMetaCommand metaCommandRef="/CCSDS/CCSDS_TC">
+            <xtce:ArgumentAssignmentList>
+              <xtce:ArgumentAssignment argumentName="CCSDS_STREAMID" argumentValue="6546"/>
+              <xtce:ArgumentAssignment argumentName="CCSDS_FC" argumentValue="1"/>
+            </xtce:ArgumentAssignmentList>
+          </xtce:BaseMetaCommand>
+          <xtce:ArgumentList/>
+          <xtce:CommandContainer name="GENERIC_REACTION_WHEEL_GENERIC_RW_RST_COUNTERS_CC_CommandContainer">
+            <xtce:EntryList/>
+          </xtce:CommandContainer>
+        </xtce:MetaCommand>
+        <xtce:MetaCommand name="GENERIC_RW_NOOP_CC">
+          <xtce:BaseMetaCommand metaCommandRef="/CCSDS/CCSDS_TC">
+            <xtce:ArgumentAssignmentList>
+              <xtce:ArgumentAssignment argumentName="CCSDS_STREAMID" argumentValue="6546"/>
+              <xtce:ArgumentAssignment argumentName="CCSDS_FC" argumentValue="0"/>
+            </xtce:ArgumentAssignmentList>
+          </xtce:BaseMetaCommand>
+          <xtce:ArgumentList/>
+          <xtce:CommandContainer name="GENERIC_REACTION_WHEEL_GENERIC_RW_NOOP_CC_CommandContainer">
+            <xtce:EntryList/>
+          </xtce:CommandContainer>
+        </xtce:MetaCommand>
+      </xtce:MetaCommandSet>
+    </xtce:CommandMetaData>
+  </xtce:SpaceSystem>
+</xtce:SpaceSystem>
