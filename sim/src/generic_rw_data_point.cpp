@@ -29,7 +29,7 @@ namespace Nos3
     //}
 
     GenericRWDataPoint::GenericRWDataPoint(int16_t spacecraft, int16_t reactionwheel, const boost::shared_ptr<Sim42DataPoint> dp) : 
-        _dp(*dp), _sc(spacecraft), _reactionwheel(reactionwheel) 
+        _dp(*dp), _sc(spacecraft), _reactionwheel(reactionwheel), _not_parsed(true)
     {
         sim_logger->trace("GPSSimDataPoint::GPSSimDataPoint:  Created instance using _sc=%d, _reactionwheel=%d, _dp=%s", 
             _sc, _reactionwheel, _dp.to_string().c_str());
