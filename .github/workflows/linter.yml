@@ -1,0 +1,38 @@
+name: Linter
+
+on: 
+  pull_request:
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: true
+
+permissions:
+  contents: write
+  
+jobs:
+    linter:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+            submodules: recursive
+
+        - name: Install clang-format
+          run: sudo apt-get update && sudo apt-get install -y clang-format
+          
+        - name: Run clang-format Linter
+          uses: DoozyX/clang-format-lint-action@v0.15
+          with:
+            source: '.'                       # Scan the whole repo
+            extensions: 'c,h'                # Target .c and .h files
+            clangFormatVersion: 14           # Match your local version
+            style: file                      # Use your .clang-format file
+            inplace: true                    # Auto-fix in place
+
+        - name: Auto-commit formatting changes
+          uses: stefanzweifel/git-auto-commit-action@v5
+          with:
+            commit_message: 'style: auto-format via clang-format'
+ #Testing Workflow
