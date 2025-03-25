@@ -12,8 +12,8 @@
 ** Required header files.
 */
 #include "device_cfg.h"
-#include "generic_reaction_wheel_platform_cfg.h"
 #include "hwlib.h"
+#include "generic_reaction_wheel_platform_cfg.h"
 
 /* Forward declarations */
 int32_t GetCurrentMomentum(uart_info_t *wheel, double *momentum);
