@@ -51,7 +51,7 @@ sleep 3
 initial_command_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT")
 initial_error_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT")
 
-value = ask "Enter Torque Value for RW_3 (integer 0-100):"
+value = ask "Enter Torque Value for RW_2 (integer 0-100):"
 
 cmd("GENERIC_REACTION_WHEEL GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 2, TORQUE #{value}")
 cmd("GENERIC_REACTION_WHEEL GENERIC_RW_REQ_DATA_CC")
@@ -76,7 +76,6 @@ reset_command_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT")
 reset_error_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT")
 
 wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT < #{initial_command_count}", 30)
-wait_check_expression("reset_command_count <= initial_command_count # #{reset_command_count} <= #{initial_command_count}", 15)
 wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT <= #{initial_error_count}", 30)
 
 sleep 5

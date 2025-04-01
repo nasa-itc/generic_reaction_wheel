@@ -69,7 +69,6 @@ reset_command_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT")
 reset_error_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT")
 
 wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT < #{initial_command_count}", 30)
-wait_check_expression("reset_command_count <= initial_command_count # #{reset_command_count} <= #{initial_command_count}", 15)
 wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT <= #{initial_error_count}", 30)
 
 sleep 5
