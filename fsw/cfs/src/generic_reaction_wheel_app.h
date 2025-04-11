@@ -77,7 +77,7 @@ void  GENERIC_RW_ProcessGroundCommand(CFE_MSG_Message_t *Msg);
 int32 GENERIC_RW_ReportHousekeeping(void);
 int32 GENERIC_RW_ResetCounters(const GENERIC_RW_ResetCounters_t *Msg);
 int32 GENERIC_RW_Noop(const GENERIC_RW_Noop_t *Msg);
-int32 GENERIC_RW_Current_Momentum(const GENERIC_RW_Noop_t *Msg);
+int32 GENERIC_RW_REQ_DATA(void);
 int32 GENERIC_RW_Set_Torque(const GENERIC_RW_Cmd_t *Msg);
 
 bool GENERIC_RW_VerifyCmdLength(CFE_MSG_Message_t *Msg, uint16 ExpectedLength);

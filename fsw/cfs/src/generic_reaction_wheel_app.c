@@ -260,7 +260,7 @@ void GENERIC_RW_ProcessGroundCommand(CFE_MSG_Message_t *Msg)
         case GENERIC_RW_APP_REQ_DATA_CC:
             if (GENERIC_RW_VerifyCmdLength(Msg, sizeof(GENERIC_RW_ResetCounters_t)))
             {
-                GENERIC_RW_Current_Momentum((GENERIC_RW_Noop_t *)Msg);
+                GENERIC_RW_REQ_DATA();
             }
 
             break;
@@ -346,15 +346,14 @@ int32 GENERIC_RW_ResetCounters(const GENERIC_RW_ResetCounters_t *Msg)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 /*                                                                            */
-/* GENERIC_RW_Noop -- GENERIC_RW Current Momentum command                         */
+/* GENERIC_RW_REQ_DATA -- GENERIC_RW_REQ_DATA command                         */
 /*                                                                            */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
-int32 GENERIC_RW_Current_Momentum(const GENERIC_RW_Noop_t *Msg)
+int32 GENERIC_RW_REQ_DATA(void)
 {
     int32_t status;
     double  momentum;
 
-    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
     CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_EventType_DEBUG, "Request Generic Reaction Wheel Data");
 
     /* Read data from the UARTs for all 3 wheels */
@@ -377,7 +376,7 @@ int32 GENERIC_RW_Current_Momentum(const GENERIC_RW_Noop_t *Msg)
     GENERIC_RW_ReportHousekeeping();
 
     return CFE_SUCCESS;
-} /* End of GENERIC_RW_Current_Momentum */
+} /* End of GENERIC_RW_REQ_DATA */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 /*                                                                            */
