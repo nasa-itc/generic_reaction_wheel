@@ -1,83 +1,61 @@
 require 'cosmos'
 require 'cosmos/script'
-require "cfs_lib.rb"
+require "generic_reaction_wheel_lib.rb"
 
+#Turning off RW's
+safe_GENERIC_REACTION_WHEEL()
 
-#Testing NOOP
-initial_command_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT")
-initial_error_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT")
+##
+# get tlm packet for Reaction wheel
+##
+GENERIC_REACTION_WHEEL_TEST_LOOP_COUNT.times do |n|
+  get_GENERIC_REACTION_WHEEL_data()
+end
 
-cmd("GENERIC_REACTION_WHEEL GENERIC_RW_NOOP_CC")
-cmd("GENERIC_REACTION_WHEEL GENERIC_RW_REQ_DATA_CC")
+##
+## Confirm NOOP command
+##
+GENERIC_REACTION_WHEEL_TEST_LOOP_COUNT.times do |n|
+  GENERIC_REACTION_WHEEL_cmd("GENERIC_REACTION_WHEEL GENERIC_RW_NOOP_CC")
+end
 
-wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT > #{initial_command_count + 1}", 30)
-wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT == #{initial_error_count}", 30)
+##
+## Confirm RW Data
+## 
+GENERIC_REACTION_WHEEL_TEST_LOOP_COUNT.times do |n|
+  #Testing RW commands and detecting Momentum directions
+  confirm_GENERIC_REACTION_WHEEL_data()
+end
 
-sleep 3
+##
+## reset counters
+##
+GENERIC_REACTION_WHEEL_TEST_LOOP_COUNT.times do |n|
+  GENERIC_REACTION_WHEEL_cmd("GENERIC_REACTION_WHEEL GENERIC_RW_NOOP_CC")
+  #ADCS May be running, so saving variables before reset
+  initial_command_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT")
+  initial_error_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT")
 
-#RW 0 Setting Torque
-initial_command_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT")
-initial_error_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT")
+  cmd("GENERIC_REACTION_WHEEL GENERIC_RW_RST_COUNTERS_CC")
 
-value = ask "Enter Torque Value for RW_0 (integer 0-100):"
+  get_GENERIC_REACTION_WHEEL_data()
+  check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT  < #{initial_command_count}")
+  check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT <= #{initial_error_count}")
 
-cmd("GENERIC_REACTION_WHEEL GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 0, TORQUE #{value}")
-cmd("GENERIC_REACTION_WHEEL GENERIC_RW_REQ_DATA_CC")
-wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT > #{initial_command_count + 1}", 30)
-wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT == #{initial_error_count}", 30)
+end
 
-rw0_momentum = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_0")
-puts "Reaction Wheel 0 Momentum (N m): #{rw0_momentum}"
+##
+##   Invalid ground command, confirm bad lengths and codes are rejected
+##
+GENERIC_REACTION_WHEEL_TEST_LOOP_COUNT.times do |n|
+   GENERIC_REACTION_WHEEL_cmd("GENERIC_REACTION_WHEEL GENERIC_RW_NOOP_CC")
+   # Bad length
+   cmd_cnt = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT")
+   cmd_err_cnt = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT")
+   cmd("GENERIC_REACTION_WHEEL GENERIC_RW_NOOP_CC with CCSDS_LENGTH #{n+2}")  # Note +2 due to CCSDS already being +1
+   get_GENERIC_REACTION_WHEEL_data()
+   check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT  == #{cmd_cnt}")
+   check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT == #{cmd_err_cnt+1}")
+end
 
-sleep 3
-
-#RW 1 Setting Torque
-initial_command_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT")
-initial_error_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT")
-
-value = ask "Enter Torque Value for RW_1 (integer 0-100):"
-
-cmd("GENERIC_REACTION_WHEEL GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 1, TORQUE #{value}")
-cmd("GENERIC_REACTION_WHEEL GENERIC_RW_REQ_DATA_CC")
-wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT > #{initial_command_count + 1}", 30)
-wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT == #{initial_error_count}", 30)
-
-rw1_momentum = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_0")
-puts "Reaction Wheel 1 Momentum (N m): #{rw1_momentum}"
-
-sleep 3
-
-#RW 2 Setting Torque
-initial_command_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT")
-initial_error_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT")
-
-value = ask "Enter Torque Value for RW_2 (integer 0-100):"
-
-cmd("GENERIC_REACTION_WHEEL GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 2, TORQUE #{value}")
-cmd("GENERIC_REACTION_WHEEL GENERIC_RW_REQ_DATA_CC")
-wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT > #{initial_command_count + 1}", 30)
-wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT == #{initial_error_count}", 30)
-
-rw2_momentum = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_0")
-puts "Reaction Wheel 2 Momentum (N m): #{rw2_momentum}"
-
-sleep 3
-
-#Resetting counters
-initial_command_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT")
-initial_error_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT")
-
-cmd("GENERIC_REACTION_WHEEL GENERIC_RW_RST_COUNTERS_CC")
-cmd("GENERIC_REACTION_WHEEL GENERIC_RW_REQ_DATA_CC")
-
-sleep 1
-
-reset_command_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT")
-reset_error_count = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT")
-
-wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT < #{initial_command_count}", 30)
-wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT <= #{initial_error_count}", 30)
-
-sleep 5
-
-puts "End of RW CPT Script"
+puts "End of RW App Test Script"
