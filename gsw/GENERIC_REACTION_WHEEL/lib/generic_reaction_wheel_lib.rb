@@ -46,14 +46,23 @@ def GENERIC_REACTION_WHEEL_cmd(*command)
     check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT >= #{count}")
 end
 
-
-
-def safe_GENERIC_REACTION_WHEEL()
-    get_GENERIC_REACTION_WHEEL_data()
+def turn_off_RWS
     #Turning off RW's
     GENERIC_REACTION_WHEEL_cmd("GENERIC_REACTION_WHEEL GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 0, TORQUE 0")
     GENERIC_REACTION_WHEEL_cmd("GENERIC_REACTION_WHEEL GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 1, TORQUE 0")
     GENERIC_REACTION_WHEEL_cmd("GENERIC_REACTION_WHEEL GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 2, TORQUE 0")
+end
+
+
+def safe_GENERIC_REACTION_WHEEL()
+    get_GENERIC_REACTION_WHEEL_data()
+
+    #turing off adcs to test RW.
+    cmd("GENERIC_ADCS GENERIC_ADCS_SET_MODE_CC with GNC_MODE PASSIVE")
+
+    #Turn off RWs, set to 0
+    turn_off_RWS()
+ 
 end
 
 def confirm_GENERIC_REACTION_WHEEL_data()
@@ -64,7 +73,7 @@ def confirm_GENERIC_REACTION_WHEEL_data()
    
     #Checking RW 0 Positive Direction
     GENERIC_REACTION_WHEEL_cmd("GENERIC_REACTION_WHEEL GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 0, TORQUE 50")
-    sleep 5
+    sleep 10
     get_GENERIC_REACTION_WHEEL_data_loop()
     check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_0 > 0")
     rw0_momentum = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_0")
@@ -72,17 +81,17 @@ def confirm_GENERIC_REACTION_WHEEL_data()
     
     #Checking RW 1 Positive Direction
     GENERIC_REACTION_WHEEL_cmd("GENERIC_REACTION_WHEEL GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 1, TORQUE 50")
-    sleep 5
+    sleep 10
     get_GENERIC_REACTION_WHEEL_data_loop()
-    wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_1 > 0", 30)
+    wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_1 > 0", GENERIC_REACTION_WHEEL_RESPONSE_TIMEOUT)
     rw1_momentum = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_1")
     puts "Reaction Wheel 1 Momentum (N m): #{rw1_momentum}"
      
     #Checking RW 2 Positive Direction
     GENERIC_REACTION_WHEEL_cmd("GENERIC_REACTION_WHEEL GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 2, TORQUE 50")
-    sleep 5
+    sleep 10
     get_GENERIC_REACTION_WHEEL_data_loop()
-    wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_2 > 0", 30)
+    wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_2 > 0", GENERIC_REACTION_WHEEL_RESPONSE_TIMEOUT)
     rw2_momentum = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_2")
     puts "Reaction Wheel 2 Momentum (N m): #{rw2_momentum}"
 
@@ -90,7 +99,7 @@ def confirm_GENERIC_REACTION_WHEEL_data()
     GENERIC_REACTION_WHEEL_cmd("GENERIC_REACTION_WHEEL GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 0, TORQUE -100")
     sleep 10
     get_GENERIC_REACTION_WHEEL_data_loop()
-    wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_0 < 0", 30)
+    wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_0 < 0", GENERIC_REACTION_WHEEL_RESPONSE_TIMEOUT)
     rw0_momentum = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_0")
     puts "Reaction Wheel 0 Momentum (N m): #{rw0_momentum}"
     
@@ -98,7 +107,7 @@ def confirm_GENERIC_REACTION_WHEEL_data()
     GENERIC_REACTION_WHEEL_cmd("GENERIC_REACTION_WHEEL GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 1, TORQUE -100")
     sleep 10
     get_GENERIC_REACTION_WHEEL_data_loop()
-    wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_1 < 0", 30)
+    wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_1 < 0", GENERIC_REACTION_WHEEL_RESPONSE_TIMEOUT)
     rw1_momentum = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_1")
     puts "Reaction Wheel 1 Momentum (N m): #{rw1_momentum}"
         
@@ -106,7 +115,7 @@ def confirm_GENERIC_REACTION_WHEEL_data()
     GENERIC_REACTION_WHEEL_cmd("GENERIC_REACTION_WHEEL GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 2, TORQUE -100")
     sleep 10
     get_GENERIC_REACTION_WHEEL_data_loop()
-    wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_2 < 0", 30)
+    wait_check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_2 < 0", GENERIC_REACTION_WHEEL_RESPONSE_TIMEOUT)
     rw2_momentum = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T MOMENTUM_NMS_2")
     puts "Reaction Wheel 2 Momentum (N m): #{rw2_momentum}"
 
@@ -128,7 +137,35 @@ def get_GENERIC_REACTION_WHEEL_data_loop()
     end
 end
 
+def teardown_RW
+    #turning back on ADCS
+    cmd("GENERIC_ADCS GENERIC_ADCS_SET_MODE_CC with GNC_MODE 2")
+end
 
+def generic_rw0_sim_disable()
+    cmd("SIM_CMDBUS_BRIDGE GENERIC_RW0_DISABLE")
+end
+
+def generic_rw1_sim_disable()
+    cmd("SIM_CMDBUS_BRIDGE GENERIC_RW1_DISABLE")
+end
+
+def generic_rw2_sim_disable()
+    cmd("SIM_CMDBUS_BRIDGE GENERIC_RW2_DISABLE")
+end
+
+
+def generic_rw0_sim_enable()
+    cmd("SIM_CMDBUS_BRIDGE GENERIC_RW0_ENABLE")
+end
+
+def generic_rw1_sim_enable()
+    cmd("SIM_CMDBUS_BRIDGE GENERIC_RW1_ENABLE")
+end
+
+def generic_rw2_sim_enable()
+    cmd("SIM_CMDBUS_BRIDGE GENERIC_RW2_ENABLE")
+end
 #
 # Simulator Functions
 #
@@ -138,5 +175,7 @@ def GENERIC_REACTION_WHEEL_prepare_ast()
 
     # Confirm data
     confirm_GENERIC_REACTION_WHEEL_data_loop()
+
+    teardown_RW()
 end
 

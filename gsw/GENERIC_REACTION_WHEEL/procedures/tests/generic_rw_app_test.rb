@@ -2,9 +2,6 @@ require 'cosmos'
 require 'cosmos/script'
 require "generic_reaction_wheel_lib.rb"
 
-#Turning off RW's
-safe_GENERIC_REACTION_WHEEL()
-
 ##
 # get tlm packet for Reaction wheel
 ##
