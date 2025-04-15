@@ -55,10 +55,8 @@ end
 
 
 def safe_GENERIC_REACTION_WHEEL()
-    get_GENERIC_REACTION_WHEEL_data()
 
-    #turing off adcs to test RW.
-    cmd("GENERIC_ADCS GENERIC_ADCS_SET_MODE_CC with GNC_MODE PASSIVE")
+    get_GENERIC_REACTION_WHEEL_data()
 
     #Turn off RWs, set to 0
     turn_off_RWS()
@@ -138,8 +136,8 @@ def get_GENERIC_REACTION_WHEEL_data_loop()
 end
 
 def teardown_RW
-    #turning back on ADCS
-    cmd("GENERIC_ADCS GENERIC_ADCS_SET_MODE_CC with GNC_MODE 2")
+
+    turn_off_RWS()
 end
 
 def generic_rw0_sim_disable()
@@ -174,7 +172,7 @@ def GENERIC_REACTION_WHEEL_prepare_ast()
     safe_GENERIC_REACTION_WHEEL()
 
     # Confirm data
-    confirm_GENERIC_REACTION_WHEEL_data_loop()
+    confirm_GENERIC_REACTION_WHEEL_data()
 
     teardown_RW()
 end
