@@ -100,6 +100,7 @@ namespace Nos3
     {
         int i = 0;
         boost::shared_ptr<SimIDataPoint> dp;
+        int cnt = 0;
         while(1)
         {
 
@@ -111,7 +112,17 @@ namespace Nos3
             }
             else 
             {
-                sim_logger->debug("GenericRWHardwareModel::uart_read_callback:  RW sim disabled! 1\n");
+                if(cnt>10)
+                {
+                    sim_logger->debug("GenericRWHardwareModel::uart_read_callback:  RW sim disabled! 1\n");
+                    cnt=0;
+                }
+                else
+                {
+                    cnt++;
+                }
+                sleep(1);
+                
             }
         }
     }
@@ -169,6 +180,9 @@ namespace Nos3
                 boost::dynamic_pointer_cast<GenericRWDataPoint>(_sdp->get_data_point());
             response = "CURRENT_MOMENTUM=" + std::to_string(data_point->get_momentum());
         }
+        else{
+            sim_logger->debug("GenericRWHardwareModel::uart_read_callback:  Getting to new else in handle command\n");
+        }
 
         return response;
     }
@@ -194,6 +208,7 @@ namespace Nos3
             response = "GenericRWHardwareModel::command_callback:  Enabled\n";
         }
         else {
+            sim_logger->debug("GenericRWHardwareModel::uart_read_callback: Getting to handle command ZL!!!!!");
             response = handle_command(command);
         }
 
