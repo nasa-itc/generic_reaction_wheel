@@ -21,6 +21,11 @@
 #define GENERIC_RW_PIPE_ERR_EID          7
 #define GENERIC_RW_CMD_REQ_DATA_EID      8
 #define GENERIC_RW_CMD_SET_TORQUE_EID    9
+#define GENERIC_RW0_DISABLE_EID          10
+#define GENERIC_RW1_DISABLE_EID          11
+#define GENERIC_RW2_DISABLE_EID          12
+#define GENERIC_RW_CLOSE_ERR_EID         13
+#define GENERIC_RW_DISABLE_ERR_EID          12
 
 #define GENERIC_RW_EVENT_COUNTS 9
 

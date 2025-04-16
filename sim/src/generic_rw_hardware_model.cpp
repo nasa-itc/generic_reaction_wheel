@@ -130,6 +130,8 @@ namespace Nos3
     void GenericRWHardwareModel::uart_read_callback(const uint8_t *buf, size_t len)
     {
         std::uint8_t valid = RW_SIM_SUCCESS;
+        // std::vector<uint8_t> error_data(1);
+        // error_data[0] = 0;
 
         // Get the data out of the message bytes
         std::vector<uint8_t> in_data(buf, buf + len);
@@ -140,6 +142,7 @@ namespace Nos3
         {
             sim_logger->debug("GenericRWHardwareModel::uart_read_callback:  RW sim disabled!\n");
             valid = RW_SIM_ERROR;
+            // _uart_connection->write(&error_data[0], error_data.size());
         }
         
         if(valid==RW_SIM_SUCCESS)
@@ -180,9 +183,6 @@ namespace Nos3
                 boost::dynamic_pointer_cast<GenericRWDataPoint>(_sdp->get_data_point());
             response = "CURRENT_MOMENTUM=" + std::to_string(data_point->get_momentum());
         }
-        else{
-            sim_logger->debug("GenericRWHardwareModel::uart_read_callback:  Getting to new else in handle command\n");
-        }
 
         return response;
     }
@@ -208,7 +208,6 @@ namespace Nos3
             response = "GenericRWHardwareModel::command_callback:  Enabled\n";
         }
         else {
-            sim_logger->debug("GenericRWHardwareModel::uart_read_callback: Getting to handle command ZL!!!!!");
             response = handle_command(command);
         }
 

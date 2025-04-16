@@ -28,6 +28,9 @@
 /***********************************************************************/
 #define GENERIC_RW_PIPE_DEPTH 32 /* Depth of the Command Pipe for Application */
 
+#define GENERIC_RW_DEVICE_DISABLED 0
+#define GENERIC_RW_DEVICE_ENABLED  1
+
 /************************************************************************
 ** Type Definitions
 *************************************************************************/
@@ -79,6 +82,7 @@ int32 GENERIC_RW_ResetCounters(const GENERIC_RW_ResetCounters_t *Msg);
 int32 GENERIC_RW_Noop(const GENERIC_RW_Noop_t *Msg);
 int32 GENERIC_RW_REQ_DATA(void);
 int32 GENERIC_RW_Set_Torque(const GENERIC_RW_Cmd_t *Msg);
+void  GENERIC_RW_Disable(const GENERIC_RW_Cmd_t *Msg);
 
 bool GENERIC_RW_VerifyCmdLength(CFE_MSG_Message_t *Msg, uint16 ExpectedLength);
 

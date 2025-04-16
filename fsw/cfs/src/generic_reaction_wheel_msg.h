@@ -19,6 +19,9 @@
 #define GENERIC_RW_APP_RESET_COUNTERS_CC 1
 #define GENERIC_RW_APP_REQ_DATA_CC       2
 #define GENERIC_RW_APP_SET_TORQUE_CC     3
+#define GENERIC_RW_ENABLE_CC             4
+#define GENERIC_RW_DISABLE_CC            5
+
 
 /*************************************************************************/
 
@@ -71,6 +74,11 @@ typedef struct
 {
     CFE_MSG_TelemetryHeader_t  TlmHeader;
     GENERIC_RW_HkTlm_Payload_t Payload;
+    uint8                     DeviceErrorCount;
+    uint8                     DeviceCount;
+    uint8                     DeviceEnabled_RW0;
+    uint8                     DeviceEnabled_RW1;
+    uint8                     DeviceEnabled_RW2;
 
 } __attribute__((packed)) GENERIC_RW_HkTlm_t;
 

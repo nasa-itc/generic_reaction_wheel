@@ -276,6 +276,7 @@ void GENERIC_RW_ProcessGroundCommand(CFE_MSG_Message_t *Msg)
 
         /* default case already found during FC vs length test */
         default:
+            GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter++;
             CFE_EVS_SendEvent(GENERIC_RW_COMMAND_ERR_EID, CFE_EVS_EventType_ERROR,
                               "Invalid ground command code: CC = %d", CommandCode);
             break;
@@ -443,3 +444,97 @@ bool GENERIC_RW_VerifyCmdLength(CFE_MSG_Message_t *Msg, uint16 ExpectedLength)
     }
     return (result);
 } /* End of GENERIC_RW_VerifyCmdLength() */
+
+
+/*
+** Disable Component Command
+*/
+void GENERIC_RW_Disable(const GENERIC_RW_Cmd_t *Msg)
+{
+    int32 status = OS_SUCCESS;
+    uint8_t wheel_num;
+
+    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
+    GENERIC_RW_Cmd_t *cmd;
+    cmd = (GENERIC_RW_Cmd_t *)Msg;
+
+    wheel_num = cmd->wheel_number;
+
+    CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_EventType_DEBUG, "Generic Reaction Wheel %d: Disable Device Command Received ", wheel_num);
+
+    /* Check that device is enabled */
+    if (wheel_num == 0 && GENERIC_RW_AppData.HkTlm.DeviceEnabled_RW0 == GENERIC_RW_DEVICE_ENABLED)
+    {
+        /* Increment command success counter */
+        GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
+
+        /* Close device specific protocols */
+        status = uart_close_port(&RW_UART[wheel_num]);
+        if (status == OS_SUCCESS)
+        {
+            GENERIC_RW_AppData.HkTlm.DeviceCount++;
+            GENERIC_RW_AppData.HkTlm.DeviceEnabled_RW0 = GENERIC_RW_DEVICE_DISABLED;
+            
+            CFE_EVS_SendEvent(GENERIC_RW0_DISABLE_EID, CFE_EVS_EventType_INFORMATION,
+                              "GENERIC_RW: RW0 Device disabled");
+        }
+        else
+        {
+            GENERIC_RW_AppData.HkTlm.DeviceErrorCount++;
+            CFE_EVS_SendEvent(GENERIC_RW_CLOSE_ERR_EID, CFE_EVS_EventType_ERROR,
+                              "GENERIC_RW: device close error %d", status);
+        }
+    }
+    if (wheel_num == 1 && GENERIC_RW_AppData.HkTlm.DeviceEnabled_RW1 == GENERIC_RW_DEVICE_ENABLED)
+    {
+        /* Increment command success counter */
+        GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
+
+        /* Close device specific protocols */
+        status = uart_close_port(&RW_UART[wheel_num]);
+        if (status == OS_SUCCESS)
+        {
+            GENERIC_RW_AppData.HkTlm.DeviceCount++;
+            GENERIC_RW_AppData.HkTlm.DeviceEnabled_RW0 = GENERIC_RW_DEVICE_DISABLED;
+            
+            CFE_EVS_SendEvent(GENERIC_RW1_DISABLE_EID, CFE_EVS_EventType_INFORMATION,
+                              "GENERIC_RW: RW1 Device disabled");
+        }
+        else
+        {
+            GENERIC_RW_AppData.HkTlm.DeviceErrorCount++;
+            CFE_EVS_SendEvent(GENERIC_RW_CLOSE_ERR_EID, CFE_EVS_EventType_ERROR,
+                              "GENERIC_RW: device close error %d", status);
+        }
+    }
+    if (wheel_num == 2 && GENERIC_RW_AppData.HkTlm.DeviceEnabled_RW2 == GENERIC_RW_DEVICE_ENABLED)
+    {
+        /* Increment command success counter */
+        GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
+
+        /* Close device specific protocols */
+        status = uart_close_port(&RW_UART[wheel_num]);
+        if (status == OS_SUCCESS)
+        {
+            GENERIC_RW_AppData.HkTlm.DeviceCount++;
+            GENERIC_RW_AppData.HkTlm.DeviceEnabled_RW0 = GENERIC_RW_DEVICE_DISABLED;
+            
+            CFE_EVS_SendEvent(GENERIC_RW2_DISABLE_EID, CFE_EVS_EventType_INFORMATION,
+                              "GENERIC_RW: RW2 Device disabled");
+        }
+        else
+        {
+            GENERIC_RW_AppData.HkTlm.DeviceErrorCount++;
+            CFE_EVS_SendEvent(GENERIC_RW_CLOSE_ERR_EID, CFE_EVS_EventType_ERROR,
+                              "GENERIC_RW: device close error %d", status);
+        }
+    }
+    else
+    {
+
+        GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter++;
+        CFE_EVS_SendEvent(GENERIC_RW_DISABLE_ERR_EID, CFE_EVS_EventType_ERROR,
+                          "GENERIC_RW: Device disable failed, already disabled");
+    }
+    return;
+}
