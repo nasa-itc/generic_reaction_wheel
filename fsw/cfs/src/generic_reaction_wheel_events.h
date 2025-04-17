@@ -25,9 +25,11 @@
 #define GENERIC_RW1_DISABLE_EID          11
 #define GENERIC_RW2_DISABLE_EID          12
 #define GENERIC_RW_CLOSE_ERR_EID         13
-#define GENERIC_RW_DISABLE_ERR_EID          12
+#define GENERIC_RW_DISABLE_ERR_EID       12
+#define GENERIC_RW0_ENABLE_EID           15
+#define GENERIC_RW_ENABLE_ERR_EID        16
 
-#define GENERIC_RW_EVENT_COUNTS 9
+#define GENERIC_RW_EVENT_COUNTS 16
 
 #endif /* _generic_reaction_wheel_app_events_h_ */
 
