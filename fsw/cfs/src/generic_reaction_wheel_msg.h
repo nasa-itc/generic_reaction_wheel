@@ -67,6 +67,11 @@ typedef struct
 {
     uint8           CommandErrorCounter;
     uint8           CommandCounter;
+    uint8           DeviceErrorCount;
+    uint8           DeviceCount;
+    uint8           DeviceEnabled_RW0;
+    uint8           DeviceEnabled_RW1;
+    uint8           DeviceEnabled_RW2;
     GENERIC_RW_Data data;
 } __attribute__((packed)) GENERIC_RW_HkTlm_Payload_t;
 
@@ -74,11 +79,6 @@ typedef struct
 {
     CFE_MSG_TelemetryHeader_t  TlmHeader;
     GENERIC_RW_HkTlm_Payload_t Payload;
-    uint8                     DeviceErrorCount;
-    uint8                     DeviceCount;
-    uint8                     DeviceEnabled_RW0;
-    uint8                     DeviceEnabled_RW1;
-    uint8                     DeviceEnabled_RW2;
 
 } __attribute__((packed)) GENERIC_RW_HkTlm_t;
 

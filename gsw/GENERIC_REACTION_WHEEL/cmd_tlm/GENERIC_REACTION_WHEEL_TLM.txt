@@ -1,4 +1,4 @@
-TELEMETRY GENERIC_REACTTION_WHEEL GENRW_HK_TLM_T LITTLE_ENDIAN "Generic Reaction Wheel Application Housekeeping Telemetry Message"
+TELEMETRY GENERIC_REACTION_WHEEL GENRW_HK_TLM_T LITTLE_ENDIAN "Generic Reaction Wheel Application Housekeeping Telemetry Message"
   APPEND_ID_ITEM CCSDS_STREAMID 16 UINT 0x0993 "CCSDS Packet Identification" BIG_ENDIAN
   APPEND_ITEM    CCSDS_SEQUENCE 16 UINT        "CCSDS Packet Sequence Control" BIG_ENDIAN
   APPEND_ITEM    CCSDS_LENGTH   16 UINT        "CCSDS Packet Data Length" BIG_ENDIAN
