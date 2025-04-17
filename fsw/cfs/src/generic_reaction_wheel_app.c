@@ -298,7 +298,7 @@ void GENERIC_RW_ProcessGroundCommand(CFE_MSG_Message_t *Msg)
         case GENERIC_RW_ENABLE_CC:
             if (GENERIC_RW_VerifyCmdLength(Msg, sizeof(GENERIC_RW_Cmd_t)))
             {
-                GENERIC_RW_Disable((GENERIC_RW_Cmd_t *)Msg);
+                GENERIC_RW_Enable((GENERIC_RW_Cmd_t *)Msg);
             }
             break;
         /* Disable Generic Reaction Wheel 0-2 */
@@ -522,7 +522,7 @@ void GENERIC_RW_Enable(const GENERIC_RW_Cmd_t *Msg)
                                "GENERIC_RW: device enable error %d", status);
          }
      }
-     if (wheel_num == 1 && GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW1 == GENERIC_RW_DEVICE_DISABLED)
+     else if (wheel_num == 1 && GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW1 == GENERIC_RW_DEVICE_DISABLED)
      {
          /* Increment command success counter */
          GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
@@ -544,7 +544,7 @@ void GENERIC_RW_Enable(const GENERIC_RW_Cmd_t *Msg)
                                "GENERIC_RW: device enable error %d", status);
          }
      }
-     if (wheel_num == 2 && GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW2 == GENERIC_RW_DEVICE_DISABLED)
+     else if (wheel_num == 2 && GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW2 == GENERIC_RW_DEVICE_DISABLED)
      {
          /* Increment command success counter */
          GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
@@ -613,7 +613,7 @@ void GENERIC_RW_Disable(const GENERIC_RW_Cmd_t *Msg)
                               "GENERIC_RW: device close error %d", status);
         }
     }
-    if (wheel_num == 1 && GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW1 == GENERIC_RW_DEVICE_ENABLED)
+    else if (wheel_num == 1 && GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW1 == GENERIC_RW_DEVICE_ENABLED)
     {
         /* Increment command success counter */
         GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
@@ -635,7 +635,7 @@ void GENERIC_RW_Disable(const GENERIC_RW_Cmd_t *Msg)
                               "GENERIC_RW: device close error %d", status);
         }
     }
-    if (wheel_num == 2 && GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW2 == GENERIC_RW_DEVICE_ENABLED)
+    else if (wheel_num == 2 && GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW2 == GENERIC_RW_DEVICE_ENABLED)
     {
         /* Increment command success counter */
         GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
