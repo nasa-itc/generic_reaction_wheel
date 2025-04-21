@@ -188,10 +188,14 @@ int32 GENERIC_RW_AppInit(void)
     /*
     ** Always reset all counters during application initialization
     */
-   GENERIC_RW_AppData.HkTlm.Payload.CommandCounter      = 0;
-   GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter = 0;
-   GENERIC_RW_AppData.HkTlm.Payload.DeviceCount = 0;
-   GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter      = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW0 = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW1 = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW2 = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW0 = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW1 = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW2 = 0;
     
     /*
     ** Initialize RW devices to Enable(on on default)
@@ -374,8 +378,12 @@ int32 GENERIC_RW_ResetCounters(const GENERIC_RW_ResetCounters_t *Msg)
 
     GENERIC_RW_AppData.HkTlm.Payload.CommandCounter      = 0;
     GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter = 0;
-    GENERIC_RW_AppData.HkTlm.Payload.DeviceCount = 0;
-    GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW0 = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW1 = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW2 = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW0 = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW1 = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW2 = 0;
 
 
     CFE_EVS_SendEvent(GENERIC_RW_COMMANDRST_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_RW: RESET command");
@@ -429,7 +437,6 @@ int32_t GENERIC_RW_Set_Torque(const GENERIC_RW_Cmd_t *Msg)
     double  torque;
     uint8_t wheel_num;
 
-    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
     GENERIC_RW_Cmd_t *cmd;
     cmd = (GENERIC_RW_Cmd_t *)Msg;
     CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_EventType_DEBUG,
@@ -444,8 +451,43 @@ int32_t GENERIC_RW_Set_Torque(const GENERIC_RW_Cmd_t *Msg)
 
     if (status < 0)
     {
+        if(wheel_num == 0)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW0++;
+        }
+        else if(wheel_num == 1)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW1++;
+        }
+        else if(wheel_num == 2)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW2++;
+        }
+        
+        GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter++;
         CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_EventType_ERROR,
-                          "Generic Reaction Wheel: Error writing to UART=%d\n", status);
+                          "Generic Reaction Wheel: Error writing to UART status = %d\n", status);
+    }
+    else
+    {
+        if(wheel_num == 0)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW0++;
+        }
+        else if(wheel_num == 1)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW1++;
+        }
+        else if(wheel_num == 2)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW2++;
+        }
+        else
+        {
+            CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_EventType_ERROR, "Generic Reaction Wheel: Invalid Wheel number, unable to set torque.");
+        }
+
+        GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
     }
 
     return status;
@@ -509,7 +551,7 @@ void GENERIC_RW_Enable(const GENERIC_RW_Cmd_t *Msg)
          status = uart_init_port(&RW_UART[wheel_num]);
          if (status == OS_SUCCESS)
          {
-             GENERIC_RW_AppData.HkTlm.Payload.DeviceCount++;
+             GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW0++;
              GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW0 = GENERIC_RW_DEVICE_ENABLED;
              
              CFE_EVS_SendEvent(GENERIC_RW0_ENABLE_EID, CFE_EVS_EventType_INFORMATION,
@@ -517,7 +559,7 @@ void GENERIC_RW_Enable(const GENERIC_RW_Cmd_t *Msg)
          }
          else
          {
-             GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount++;
+             GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW0++;
              CFE_EVS_SendEvent(GENERIC_RW_ENABLE_ERR_EID, CFE_EVS_EventType_ERROR,
                                "GENERIC_RW: device enable error %d", status);
          }
@@ -531,7 +573,7 @@ void GENERIC_RW_Enable(const GENERIC_RW_Cmd_t *Msg)
          status = uart_init_port(&RW_UART[wheel_num]);
          if (status == OS_SUCCESS)
          {
-             GENERIC_RW_AppData.HkTlm.Payload.DeviceCount++;
+             GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW1++;
              GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW1 = GENERIC_RW_DEVICE_ENABLED;
              
              CFE_EVS_SendEvent(GENERIC_RW0_ENABLE_EID, CFE_EVS_EventType_INFORMATION,
@@ -539,7 +581,7 @@ void GENERIC_RW_Enable(const GENERIC_RW_Cmd_t *Msg)
          }
          else
          {
-             GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount++;
+             GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW1++;
              CFE_EVS_SendEvent(GENERIC_RW_ENABLE_ERR_EID, CFE_EVS_EventType_ERROR,
                                "GENERIC_RW: device enable error %d", status);
          }
@@ -553,7 +595,7 @@ void GENERIC_RW_Enable(const GENERIC_RW_Cmd_t *Msg)
          status = uart_init_port(&RW_UART[wheel_num]);
          if (status == OS_SUCCESS)
          {
-             GENERIC_RW_AppData.HkTlm.Payload.DeviceCount++;
+             GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW2++;
              GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW2 = GENERIC_RW_DEVICE_ENABLED;
              
              CFE_EVS_SendEvent(GENERIC_RW0_ENABLE_EID, CFE_EVS_EventType_INFORMATION,
@@ -561,7 +603,7 @@ void GENERIC_RW_Enable(const GENERIC_RW_Cmd_t *Msg)
          }
          else
          {
-             GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount++;
+             GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW2++;
              CFE_EVS_SendEvent(GENERIC_RW_ENABLE_ERR_EID, CFE_EVS_EventType_ERROR,
                                "GENERIC_RW: device enable error %d", status);
          }
@@ -600,7 +642,7 @@ void GENERIC_RW_Disable(const GENERIC_RW_Cmd_t *Msg)
         status = uart_close_port(&RW_UART[wheel_num]);
         if (status == OS_SUCCESS)
         {
-            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount++;
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW0++;
             GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW0 = GENERIC_RW_DEVICE_DISABLED;
             
             CFE_EVS_SendEvent(GENERIC_RW0_DISABLE_EID, CFE_EVS_EventType_INFORMATION,
@@ -608,7 +650,7 @@ void GENERIC_RW_Disable(const GENERIC_RW_Cmd_t *Msg)
         }
         else
         {
-            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount++;
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW0++;
             CFE_EVS_SendEvent(GENERIC_RW_CLOSE_ERR_EID, CFE_EVS_EventType_ERROR,
                               "GENERIC_RW: device close error %d", status);
         }
@@ -622,7 +664,7 @@ void GENERIC_RW_Disable(const GENERIC_RW_Cmd_t *Msg)
         status = uart_close_port(&RW_UART[wheel_num]);
         if (status == OS_SUCCESS)
         {
-            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount++;
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW1++;
             GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW1 = GENERIC_RW_DEVICE_DISABLED;
             
             CFE_EVS_SendEvent(GENERIC_RW1_DISABLE_EID, CFE_EVS_EventType_INFORMATION,
@@ -630,7 +672,7 @@ void GENERIC_RW_Disable(const GENERIC_RW_Cmd_t *Msg)
         }
         else
         {
-            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount++;
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW1++;
             CFE_EVS_SendEvent(GENERIC_RW_CLOSE_ERR_EID, CFE_EVS_EventType_ERROR,
                               "GENERIC_RW: device close error %d", status);
         }
@@ -644,7 +686,7 @@ void GENERIC_RW_Disable(const GENERIC_RW_Cmd_t *Msg)
         status = uart_close_port(&RW_UART[wheel_num]);
         if (status == OS_SUCCESS)
         {
-            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount++;
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW2++;
             GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW2 = GENERIC_RW_DEVICE_DISABLED;
             
             CFE_EVS_SendEvent(GENERIC_RW2_DISABLE_EID, CFE_EVS_EventType_INFORMATION,
@@ -652,7 +694,7 @@ void GENERIC_RW_Disable(const GENERIC_RW_Cmd_t *Msg)
         }
         else
         {
-            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount++;
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW2++;
             CFE_EVS_SendEvent(GENERIC_RW_CLOSE_ERR_EID, CFE_EVS_EventType_ERROR,
                               "GENERIC_RW: device close error %d", status);
         }

@@ -67,8 +67,12 @@ typedef struct
 {
     uint8           CommandErrorCounter;
     uint8           CommandCounter;
-    uint8           DeviceErrorCount;
-    uint8           DeviceCount;
+    uint8           DeviceErrorCount_RW0;
+    uint8           DeviceErrorCount_RW1;
+    uint8           DeviceErrorCount_RW2;
+    uint8           DeviceCount_RW0;
+    uint8           DeviceCount_RW1;
+    uint8           DeviceCount_RW2;
     uint8           DeviceEnabled_RW0;
     uint8           DeviceEnabled_RW1;
     uint8           DeviceEnabled_RW2;

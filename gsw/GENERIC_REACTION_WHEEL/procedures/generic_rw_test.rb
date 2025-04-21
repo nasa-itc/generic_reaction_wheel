@@ -11,9 +11,9 @@ class RW_Functional_Test < Cosmos::Test
     start("tests/generic_rw_app_test.rb")
   end
 
-  # def test_device
-  #   start("tests/generic_rw_device_test.rb") ## TODO
-  # end
+  def test_device
+    start("tests/generic_rw_device_test.rb")
+  end
 
   def teardown
     teardown_RW()
