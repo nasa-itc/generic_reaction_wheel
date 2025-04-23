@@ -142,7 +142,6 @@ namespace Nos3
         {
             sim_logger->debug("GenericRWHardwareModel::uart_read_callback:  RW sim disabled!\n");
             valid = RW_SIM_ERROR;
-            // _uart_connection->write(&error_data[0], error_data.size());
         }
         
         if(valid==RW_SIM_SUCCESS)

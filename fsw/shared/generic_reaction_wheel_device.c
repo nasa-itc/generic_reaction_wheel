@@ -84,6 +84,12 @@ int32_t SetRWTorque(uart_info_t *wheel, double torque)
             DataBuffer[DataLen] = 0; // Ensure null termination
             // OS_printf("Generic Reaction Wheel: Response on UART=%s\n", (char *)DataBuffer);
         }
+        else if (DataLen == 0)
+        {
+            // Datalen should be greater than 0 bytes if not sim response is not operating correctly
+            // OS_printf("Generic Reaction Wheel: Response on Uart is %d bytes", DataLen);
+            status = OS_ERROR;
+        }
     }
 
     return status;
