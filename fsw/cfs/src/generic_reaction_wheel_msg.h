@@ -22,7 +22,6 @@
 #define GENERIC_RW_ENABLE_CC             4
 #define GENERIC_RW_DISABLE_CC            5
 
-
 /*************************************************************************/
 
 /*
