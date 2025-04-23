@@ -114,7 +114,7 @@ namespace Nos3
             {
                 if(cnt>10)
                 {
-                    sim_logger->debug("GenericRWHardwareModel::uart_read_callback:  RW sim disabled! 1\n");
+                    sim_logger->debug("GenericRWHardwareModel::uart_read_callback:  RW sim disabled!\n");
                     cnt=0;
                 }
                 else
