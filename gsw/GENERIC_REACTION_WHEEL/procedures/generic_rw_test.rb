@@ -1,43 +1,51 @@
 require 'cosmos'
 require 'cosmos/script'
-require 'mission_lib.rb'
+require "generic_reaction_wheel_lib.rb"
 
-class LPT < Cosmos::Test
+class RW_Functional_Test < Cosmos::Test
   def setup
-      enable_TO_and_verify()
+      safe_GENERIC_REACTION_WHEEL()
   end
 
-  def test_lpt
+  def test_application
+    start("tests/generic_rw_app_test.rb")
+  end
+
+  def test_device
+    start("tests/generic_rw_device_test.rb")
   end
 
   def teardown
-      cmd("CFS_RADIO TO_PAUSE_OUTPUT")
+    teardown_RW()
   end
 end
 
-class CPT < Cosmos::Test
+class RW_Automated_Scenario_Test < Cosmos::Test
   def setup
-      
+    safe_GENERIC_REACTION_WHEEL()
   end
 
-  def test_cpt
+  def test_ast
+    start("tests/generic_rw_ast_test.rb")
   end
 
   def teardown
-
+    teardown_RW()
   end
 end
 
 class Generic_rw_Test < Cosmos::TestSuite
   def initialize
       super()
-      add_test('CPT')
-      add_test('LPT')
+      add_test('RW_Functional_Test')
+      add_test('RW_Automated_Scenario_Test')
   end
 
   def setup
+    safe_GENERIC_REACTION_WHEEL()
   end
   
   def teardown
+    teardown_RW()
   end
 end

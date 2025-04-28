@@ -1,4 +1,4 @@
-TELEMETRY GENERIC_REACTTION_WHEEL GENRW_HK_TLM_T LITTLE_ENDIAN "Generic Reaction Wheel Application Housekeeping Telemetry Message"
+TELEMETRY GENERIC_REACTION_WHEEL GENRW_HK_TLM_T LITTLE_ENDIAN "Generic Reaction Wheel Application Housekeeping Telemetry Message"
   APPEND_ID_ITEM CCSDS_STREAMID 16 UINT 0x0993 "CCSDS Packet Identification" BIG_ENDIAN
   APPEND_ITEM    CCSDS_SEQUENCE 16 UINT        "CCSDS Packet Sequence Control" BIG_ENDIAN
   APPEND_ITEM    CCSDS_LENGTH   16 UINT        "CCSDS Packet Data Length" BIG_ENDIAN
@@ -7,6 +7,15 @@ TELEMETRY GENERIC_REACTTION_WHEEL GENRW_HK_TLM_T LITTLE_ENDIAN "Generic Reaction
   APPEND_ITEM    CCSDS_SPARE    32 UINT        ""
   APPEND_ITEM    ERROR_COUNT     8 UINT        "Error Count"
   APPEND_ITEM    COMMAND_COUNT   8 UINT        "Command Count"
+  APPEND_ITEM    DEVICE_ERR_COUNT_RW0      8 UINT         "Device Command Error Count RW0"
+  APPEND_ITEM    DEVICE_ERR_COUNT_RW1      8 UINT         "Device Command Error Count RW1"
+  APPEND_ITEM    DEVICE_ERR_COUNT_RW2      8 UINT         "Device Command Error Count RW2"
+  APPEND_ITEM    DEVICE_COUNT_RW0          8 UINT         "Device Command Count RW1"
+  APPEND_ITEM    DEVICE_COUNT_RW1          8 UINT         "Device Command Count RW1"
+  APPEND_ITEM    DEVICE_COUNT_RW2          8 UINT         "Device Command Count RW2"
+  APPEND_ITEM    DEVICE_ENABLED_RW0    8 UINT         "Device Enable Status"
+  APPEND_ITEM    DEVICE_ENABLED_RW1    8 UINT         "Device Enable Status"
+  APPEND_ITEM    DEVICE_ENABLED_RW2    8 UINT         "Device Enable Status"
   APPEND_ITEM    MOMENTUM_NMS_0 64 FLOAT       "Reaction Wheel 0 Momentum in Newton-meter-seconds"
     FORMAT_STRING "%.6f"
   APPEND_ITEM    MOMENTUM_NMS_1 64 FLOAT       "Reaction Wheel 1 Momentum in Newton-meter-seconds"

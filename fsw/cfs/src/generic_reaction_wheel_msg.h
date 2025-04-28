@@ -19,6 +19,8 @@
 #define GENERIC_RW_APP_RESET_COUNTERS_CC 1
 #define GENERIC_RW_APP_REQ_DATA_CC       2
 #define GENERIC_RW_APP_SET_TORQUE_CC     3
+#define GENERIC_RW_ENABLE_CC             4
+#define GENERIC_RW_DISABLE_CC            5
 
 /*************************************************************************/
 
@@ -64,6 +66,15 @@ typedef struct
 {
     uint8           CommandErrorCounter;
     uint8           CommandCounter;
+    uint8           DeviceErrorCount_RW0;
+    uint8           DeviceErrorCount_RW1;
+    uint8           DeviceErrorCount_RW2;
+    uint8           DeviceCount_RW0;
+    uint8           DeviceCount_RW1;
+    uint8           DeviceCount_RW2;
+    uint8           DeviceEnabled_RW0;
+    uint8           DeviceEnabled_RW1;
+    uint8           DeviceEnabled_RW2;
     GENERIC_RW_Data data;
 } __attribute__((packed)) GENERIC_RW_HkTlm_Payload_t;
 

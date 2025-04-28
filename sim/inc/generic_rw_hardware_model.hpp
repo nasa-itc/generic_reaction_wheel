@@ -26,6 +26,14 @@
 
 #include <atomic>
 
+
+
+/*
+** Defines
+*/
+#define RW_SIM_SUCCESS 0
+#define RW_SIM_ERROR   1
+
 namespace Nos3
 {
     class GenericRWHardwareModel : public SimIHardwareModel
@@ -42,7 +50,7 @@ namespace Nos3
         std::string handle_command(std::string command);
 
 
-        std::atomic<bool>                       _keep_running;
+        std::uint8_t                            _enabled;
         SimIDataProvider*                       _sdp;
         std::unique_ptr<NosEngine::Client::Bus> _time_bus;
         std::unique_ptr<NosEngine::Uart::Uart>  _uart_connection;
