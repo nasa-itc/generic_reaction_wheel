@@ -126,7 +126,7 @@ int32 GENERIC_RW_AppInit(void)
     status = CFE_EVS_Register(NULL, 0, CFE_EVS_EventFilter_BINARY);
     if (status != CFE_SUCCESS)
     {
-        CFE_ES_WriteToSysLog("GENERIC_RW App: Error Registering Events, RC = 0x%08lX\n", (unsigned long)status);
+        CFE_ES_WriteToSysLog("GENERIC_RW App: Error Registering Events, RC = 0x%08lX", (unsigned long)status);
         return (status);
     }
 
@@ -140,17 +140,17 @@ int32 GENERIC_RW_AppInit(void)
     status = uart_init_port(&RW_UART[0]);
     if (status != CFE_SUCCESS)
     {
-        CFE_ES_WriteToSysLog("GENERIC_RW App: UART 0 port initialization error!\n");
+        CFE_ES_WriteToSysLog("GENERIC_RW App: UART 0 port initialization error!");
     }
     status = uart_init_port(&RW_UART[1]);
     if (status != CFE_SUCCESS)
     {
-        CFE_ES_WriteToSysLog("GENERIC_RW App: UART 1 port initialization error!\n");
+        CFE_ES_WriteToSysLog("GENERIC_RW App: UART 1 port initialization error!");
     }
     status = uart_init_port(&RW_UART[2]);
     if (status != CFE_SUCCESS)
     {
-        CFE_ES_WriteToSysLog("GENERIC_RW App: UART 2 port initialization error!\n");
+        CFE_ES_WriteToSysLog("GENERIC_RW App: UART 2 port initialization error!");
     }
 
     /*
@@ -160,7 +160,7 @@ int32 GENERIC_RW_AppInit(void)
         CFE_SB_CreatePipe(&GENERIC_RW_AppData.CommandPipe, GENERIC_RW_AppData.PipeDepth, GENERIC_RW_AppData.PipeName);
     if (status != CFE_SUCCESS)
     {
-        CFE_ES_WriteToSysLog("GENERIC_RW App: Error creating pipe, RC = 0x%08lX\n", (unsigned long)status);
+        CFE_ES_WriteToSysLog("GENERIC_RW App: Error creating pipe, RC = 0x%08lX", (unsigned long)status);
         return (status);
     }
 
@@ -170,7 +170,7 @@ int32 GENERIC_RW_AppInit(void)
     status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(GENERIC_RW_APP_SEND_HK_MID), GENERIC_RW_AppData.CommandPipe);
     if (status != CFE_SUCCESS)
     {
-        CFE_ES_WriteToSysLog("GENERIC_RW App: Error Subscribing to HK request, RC = 0x%08lX\n", (unsigned long)status);
+        CFE_ES_WriteToSysLog("GENERIC_RW App: Error Subscribing to HK request, RC = 0x%08lX", (unsigned long)status);
         return (status);
     }
 
@@ -180,7 +180,7 @@ int32 GENERIC_RW_AppInit(void)
     status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(GENERIC_RW_APP_CMD_MID), GENERIC_RW_AppData.CommandPipe);
     if (status != CFE_SUCCESS)
     {
-        CFE_ES_WriteToSysLog("GENERIC_RW App: Error Subscribing to Command, RC = 0x%08lX\n", (unsigned long)status);
+        CFE_ES_WriteToSysLog("GENERIC_RW App: Error Subscribing to Command, RC = 0x%08lX", (unsigned long)status);
 
         return (status);
     }
@@ -210,7 +210,7 @@ int32 GENERIC_RW_AppInit(void)
 
     if (status != CFE_SUCCESS)
     {
-        CFE_ES_WriteToSysLog("GENERIC_RW App:: Error sending initialization event: 0x%08X\n", (unsigned int)status);
+        CFE_ES_WriteToSysLog("GENERIC_RW App:: Error sending initialization event: 0x%08X", (unsigned int)status);
     }
 
     return (status);
@@ -407,7 +407,7 @@ int32 GENERIC_RW_REQ_DATA(void)
     for (int i = 0; i < 3; i++)
     {
         status = GetCurrentMomentum(&RW_UART[i], &momentum);
-        // OS_printf("GENERIC_RW: GetCurrentMomentum:  status=%d, momentum=%f\n", status, momentum);
+        // OS_printf("GENERIC_RW: GetCurrentMomentum:  status=%d, momentum=%f", status, momentum);
         if (status > 0)
         {
             GENERIC_RW_AppData.HkTlm.Payload.data.momentum[i] = momentum;
@@ -465,7 +465,7 @@ int32_t GENERIC_RW_Set_Torque(const GENERIC_RW_Cmd_t *Msg)
 
         GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter++;
         CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_EventType_ERROR,
-                          "Generic Reaction Wheel: Error writing to UART status = %d\n", status);
+                          "Generic Reaction Wheel: Error writing to UART status = %d", status);
     }
     else
     {

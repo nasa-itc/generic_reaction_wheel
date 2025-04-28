@@ -35,7 +35,6 @@ GENERIC_REACTION_WHEEL_TEST_LOOP_COUNT.times do |n|
   cmd_err_cnt = tlm("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT")
 
   #sending 3 torque commands (value set to 0)
-  # turn_off_RWS()
   cmd("GENERIC_REACTION_WHEEL GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 0, TORQUE 0")
   cmd("GENERIC_REACTION_WHEEL GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 1, TORQUE 0")
   cmd("GENERIC_REACTION_WHEEL GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 2, TORQUE 0")
@@ -50,11 +49,10 @@ GENERIC_REACTION_WHEEL_TEST_LOOP_COUNT.times do |n|
   check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T COMMAND_COUNT == #{cmd_cnt}")
   check("GENERIC_REACTION_WHEEL GENRW_HK_TLM_T ERROR_COUNT == #{cmd_err_cnt+3}") #+3 for 3 commands failed
 
-
   enable_all_RW()
 
   #confirming normal counters
   confirm_RW_device_data()
-  
 end
+
 puts "End of RW Device Test Script"
