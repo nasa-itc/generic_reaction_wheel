@@ -10,21 +10,6 @@
 #include "rw_src/Generic_reaction_wheel.hpp"
 #include "FpConfig.hpp"
 
-extern "C"{
-#include "generic_reaction_wheel_device.h"
-#include "libuart.h"
-}
-
-#include "nos_link.h"
-
-/*
-** Global Variables
-*/
-static uart_info_t RW_UART[3] = {
-  {.deviceString = &GENERIC_REACTION_WHEEL_1_CFG_STRING[0], .handle = GENERIC_REACTION_WHEEL_1_CFG_HANDLE, .isOpen = GENERIC_REACTION_WHEEL_1_CFG_IS_OPEN, .baud = GENERIC_REACTION_WHEEL_1_CFG_BAUDRATE_HZ},
-  {.deviceString = &GENERIC_REACTION_WHEEL_2_CFG_STRING[0], .handle = GENERIC_REACTION_WHEEL_2_CFG_HANDLE, .isOpen = GENERIC_REACTION_WHEEL_2_CFG_IS_OPEN, .baud = GENERIC_REACTION_WHEEL_2_CFG_BAUDRATE_HZ},
-  {.deviceString = &GENERIC_REACTION_WHEEL_3_CFG_STRING[0], .handle = GENERIC_REACTION_WHEEL_3_CFG_HANDLE, .isOpen = GENERIC_REACTION_WHEEL_3_CFG_IS_OPEN, .baud = GENERIC_REACTION_WHEEL_3_CFG_BAUDRATE_HZ},
-};
 
 namespace Components {
 
@@ -57,13 +42,27 @@ namespace Components {
     {
     	OS_printf("GENERIC_RW Checkout: UART 2 port initialization error!\n");
     } 
+
+    for ( int i = 0; i < RW_NUM; i++ )
+    {
+        uart_close_port(&RW_UART[i]);
+    }
+
+    HkTelemetryPkt.CommandCount = 0;
+    HkTelemetryPkt.CommandErrorCount = 0;
+
+    for(int i = 0; i < RW_NUM; i++){
+      HkTelemetryPkt.DeviceCount[i] = 0;
+      HkTelemetryPkt.DeviceErrorCount[i] = 0;
+      HkTelemetryPkt.DeviceEnabled[i] = GENERIC_RW_DEVICE_DISABLED;
+    }
   }
 
   Generic_reaction_wheel ::
     ~Generic_reaction_wheel()
   {
     // Close the devices
-    for ( int i = 0; i < 3; i++ )
+    for ( int i = 0; i < RW_NUM; i++ )
     {
         uart_close_port(&RW_UART[i]);
     }
@@ -77,87 +76,272 @@ namespace Components {
   // Handler implementations for commands
   // ----------------------------------------------------------------------
 
-  // GENERIC_REACTION_WHEEL_Get_Momentum
-  void Generic_reaction_wheel :: GET_MOMENTUM_cmdHandler(FwOpcodeType opCode, U32 cmdSeq)
+  void Generic_reaction_wheel :: NOOP_cmdHandler(FwOpcodeType opCode, U32 cmdSeq){
+    HkTelemetryPkt.CommandCount++;
+
+    this->log_ACTIVITY_HI_TELEM("NOOP command success!");
+    OS_printf("NOOP command successful!\n");
+
+    this->tlmWrite_CommandCount(HkTelemetryPkt.CommandCount);
+    this->tlmWrite_DeviceEnabledRW0(get_active_state(HkTelemetryPkt.DeviceEnabled[0]));
+    this->tlmWrite_DeviceEnabledRW1(get_active_state(HkTelemetryPkt.DeviceEnabled[1]));
+    this->tlmWrite_DeviceEnabledRW2(get_active_state(HkTelemetryPkt.DeviceEnabled[2]));
+    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+  }
+
+  void Generic_reaction_wheel :: RESET_COUNTERS_cmdHandler(FwOpcodeType opCode, U32 cmdSeq){
+    HkTelemetryPkt.CommandCount = 0;
+    HkTelemetryPkt.CommandErrorCount = 0;
+    HkTelemetryPkt.DeviceCount[0] = 0;
+    HkTelemetryPkt.DeviceErrorCount[0] = 0;
+    HkTelemetryPkt.DeviceCount[1] = 0;
+    HkTelemetryPkt.DeviceErrorCount[1] = 0;
+    HkTelemetryPkt.DeviceCount[2] = 0;
+    HkTelemetryPkt.DeviceErrorCount[2] = 0;
+
+    this->log_ACTIVITY_HI_TELEM("Reset Counters command successful!");
+    OS_printf("Reset Counters command successful!\n");
+    this->tlmWrite_CommandCount(HkTelemetryPkt.CommandCount);
+    this->tlmWrite_CommandErrorCount(HkTelemetryPkt.CommandErrorCount);
+
+    this->tlmWrite_DeviceCountRW0(HkTelemetryPkt.DeviceCount[0]);
+    this->tlmWrite_DeviceErrorCountRW0(HkTelemetryPkt.DeviceErrorCount[0]);
+    this->tlmWrite_DeviceEnabledRW0(get_active_state(HkTelemetryPkt.DeviceEnabled[0]));
+
+    this->tlmWrite_DeviceCountRW1(HkTelemetryPkt.DeviceCount[1]);
+    this->tlmWrite_DeviceErrorCountRW1(HkTelemetryPkt.DeviceErrorCount[1]);
+    this->tlmWrite_DeviceEnabledRW1(get_active_state(HkTelemetryPkt.DeviceEnabled[1]));
+
+    this->tlmWrite_DeviceCountRW2(HkTelemetryPkt.DeviceCount[2]);
+    this->tlmWrite_DeviceErrorCountRW2(HkTelemetryPkt.DeviceErrorCount[2]);
+    this->tlmWrite_DeviceEnabledRW2(get_active_state(HkTelemetryPkt.DeviceEnabled[2]));
+
+    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+  }
+
+  void Generic_reaction_wheel :: ENABLE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, const Generic_reaction_wheel_wheelNums wheel_num){
+
+    int32_t status = OS_SUCCESS;
+
+    if(HkTelemetryPkt.DeviceEnabled[wheel_num.e] == GENERIC_RW_DEVICE_DISABLED)
+    {
+      HkTelemetryPkt.CommandCount++;
+
+      status = uart_init_port(&RW_UART[wheel_num.e]);
+      if(status == OS_SUCCESS)
+      {
+        HkTelemetryPkt.DeviceCount[wheel_num.e]++;
+        HkTelemetryPkt.DeviceEnabled[wheel_num.e] = GENERIC_RW_DEVICE_ENABLED;
+        char configMsg[40];
+        sprintf(configMsg, "Enabled RW%d successfully!", wheel_num.e);
+        this->log_ACTIVITY_HI_TELEM(configMsg);
+        OS_printf("Enabled RW%d successfully!\n", wheel_num.e);
+      }
+      else
+      {
+        HkTelemetryPkt.DeviceErrorCount[wheel_num.e]++;
+        char configMsg[40];
+        sprintf(configMsg, "Enable RW%d failed, uart init fail!", wheel_num.e);
+        this->log_ACTIVITY_HI_TELEM(configMsg);
+        OS_printf("Enable RW%d failed, uart init fail!\n", wheel_num.e);
+      }
+    }
+    else
+    {
+      HkTelemetryPkt.CommandErrorCount++;
+      char configMsg[40];
+        sprintf(configMsg, "Enable RW%d failed, already enabled!", wheel_num.e);
+        this->log_ACTIVITY_HI_TELEM(configMsg);
+        OS_printf("Enable RW%d failed, already enabled!\n", wheel_num.e);
+    }
+
+    this->tlmWrite_DeviceCountRW0(HkTelemetryPkt.DeviceCount[0]);
+    this->tlmWrite_DeviceErrorCountRW0(HkTelemetryPkt.DeviceErrorCount[0]);
+    this->tlmWrite_DeviceEnabledRW0(get_active_state(HkTelemetryPkt.DeviceEnabled[0]));
+
+    this->tlmWrite_DeviceCountRW1(HkTelemetryPkt.DeviceCount[1]);
+    this->tlmWrite_DeviceErrorCountRW1(HkTelemetryPkt.DeviceErrorCount[1]);
+    this->tlmWrite_DeviceEnabledRW1(get_active_state(HkTelemetryPkt.DeviceEnabled[1]));
+
+    this->tlmWrite_DeviceCountRW2(HkTelemetryPkt.DeviceCount[2]);
+    this->tlmWrite_DeviceErrorCountRW2(HkTelemetryPkt.DeviceErrorCount[2]);
+    this->tlmWrite_DeviceEnabledRW2(get_active_state(HkTelemetryPkt.DeviceEnabled[2]));
+    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+  }
+
+  void Generic_reaction_wheel :: DISABLE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, const Generic_reaction_wheel_wheelNums wheel_num){
+    int32_t status = OS_SUCCESS;
+
+    if(HkTelemetryPkt.DeviceEnabled[wheel_num.e] == GENERIC_RW_DEVICE_ENABLED)
+    {
+      HkTelemetryPkt.CommandCount++;
+
+      status = uart_close_port(&RW_UART[wheel_num.e]);
+      if(status == OS_SUCCESS)
+      {
+        HkTelemetryPkt.DeviceCount[wheel_num.e]++;
+        HkTelemetryPkt.DeviceEnabled[wheel_num.e] = GENERIC_RW_DEVICE_DISABLED;
+        char configMsg[40];
+        sprintf(configMsg, "Disabled RW%d successfully!", wheel_num.e);
+        this->log_ACTIVITY_HI_TELEM(configMsg);
+        OS_printf("Disabled RW%d successfully!\n", wheel_num.e);
+      }
+      else
+      {
+        HkTelemetryPkt.DeviceErrorCount[wheel_num.e]++;
+        char configMsg[40];
+        sprintf(configMsg, "Disable RW%d failed, uart close fail!", wheel_num.e);
+        this->log_ACTIVITY_HI_TELEM(configMsg);
+        OS_printf("Disable RW%d failed, uart close fail!\n", wheel_num.e);
+      }
+    }
+    else
+    {
+      HkTelemetryPkt.CommandErrorCount++;
+      char configMsg[40];
+        sprintf(configMsg, "Disable RW%d failed, already Disabled!", wheel_num.e);
+        this->log_ACTIVITY_HI_TELEM(configMsg);
+        OS_printf("Disable RW%d failed, already Disabled!\n", wheel_num.e);
+    }
+
+    this->tlmWrite_DeviceCountRW0(HkTelemetryPkt.DeviceCount[0]);
+    this->tlmWrite_DeviceErrorCountRW0(HkTelemetryPkt.DeviceErrorCount[0]);
+    this->tlmWrite_DeviceEnabledRW0(get_active_state(HkTelemetryPkt.DeviceEnabled[0]));
+
+    this->tlmWrite_DeviceCountRW1(HkTelemetryPkt.DeviceCount[1]);
+    this->tlmWrite_DeviceErrorCountRW1(HkTelemetryPkt.DeviceErrorCount[1]);
+    this->tlmWrite_DeviceEnabledRW1(get_active_state(HkTelemetryPkt.DeviceEnabled[1]));
+
+    this->tlmWrite_DeviceCountRW2(HkTelemetryPkt.DeviceCount[2]);
+    this->tlmWrite_DeviceErrorCountRW2(HkTelemetryPkt.DeviceErrorCount[2]);
+    this->tlmWrite_DeviceEnabledRW2(get_active_state(HkTelemetryPkt.DeviceEnabled[2]));
+
+
+    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+  }
+
+  // GENERIC_REACTION_WHEEL_REQUEST_DATA
+  void Generic_reaction_wheel :: REQUEST_DATA_cmdHandler(FwOpcodeType opCode, U32 cmdSeq)
   {
 
     int32_t status = OS_SUCCESS;
-    double RW0_Data;
-    double RW1_Data;
-    double RW2_Data;
 
-    status = GetCurrentMomentum(&RW_UART[0], &RW0_Data);
-    if (status < 0)
-    {
-      this->log_ACTIVITY_HI_TELEM("RW_GetCurrentMomentum: Command Failed for RW 0!");  
-      OS_printf("GENERIC_REACTION_WHEEL_RequestData command failed for RW 0!\n");
-    }
-    else
-    {
-      this->log_ACTIVITY_HI_TELEM("RW_GetCurrentMomentum: Success for RW 0!");
-      OS_printf("RW_GetCurrentMomentum: Success for RW 0! Momentum: %lf\n", RW0_Data);
-    }
-    status = GetCurrentMomentum(&RW_UART[1], &RW1_Data);
-    if (status < 0)
-    {
-      this->log_ACTIVITY_HI_TELEM("RW_GetCurrentMomentum: Command Failed for RW 1!");  
-      OS_printf("GENERIC_REACTION_WHEEL_RequestData command failed for RW 1!\n");
-    }
-    else
-    {
-      this->log_ACTIVITY_HI_TELEM("RW_GetCurrentMomentum: Success for RW 1!");
-      OS_printf("RW_GetCurrentMomentum: Success for RW 1! Momentum: %lf\n", RW1_Data);
-    }
-    status = GetCurrentMomentum(&RW_UART[2], &RW2_Data);
-    if (status < 0)
-    {
-      this->log_ACTIVITY_HI_TELEM("RW_GetCurrentMomentum: Command Failed for RW 0!");  
-      OS_printf("GENERIC_REACTION_WHEEL_RequestData command failed for RW 2!\n");
-    }
-    else
-    {
-      this->log_ACTIVITY_HI_TELEM("RW_GetCurrentMomentum: Success for RW 2!");
-      OS_printf("RW_GetCurrentMomentum: Success for RW 2! Momentum: %lf\n", RW2_Data);
-    }
+    for(int i = 0; i < RW_NUM; i++){
+      status = GetCurrentMomentum(&RW_UART[i], &HkTelemetryPkt.momentum[i]);
+      if (status < 0)
+      {
+        char configMsg[40];
+        sprintf(configMsg, "Failed to get momentum for RW%d!", i);
+        this->log_ACTIVITY_HI_TELEM(configMsg);
+        OS_printf("Failed to get momentum for RW%d!\n", i);
+        HkTelemetryPkt.DeviceErrorCount[i]++;
+      }
+      else
+      {
+        char configMsg[40];
+        sprintf(configMsg, "Successfully got momentum for RW%d!", i);
+        this->log_ACTIVITY_HI_TELEM(configMsg);
+        OS_printf("Successfully got momentum for RW%d!\n", i);
+        HkTelemetryPkt.DeviceCount[i]++;
+      }
 
-
-    this->tlmWrite_RW0_Data(RW0_Data);
-    this->tlmWrite_RW1_Data(RW1_Data);
-    this->tlmWrite_RW2_Data(RW2_Data);
+      switch (i)
+      {
+      case 0:
+        this->tlmWrite_RW0_Data(HkTelemetryPkt.momentum[i]);
+        break;
+      case 1:
+        this->tlmWrite_RW1_Data(HkTelemetryPkt.momentum[i]);
+        break;
+      case 2:
+        this->tlmWrite_RW2_Data(HkTelemetryPkt.momentum[i]);
+        break;
+      
+      default:
+        break;
+      }
+    }
     
+    this->tlmWrite_CommandCount(++HkTelemetryPkt.CommandCount);
+    this->tlmWrite_DeviceCountRW0(HkTelemetryPkt.DeviceCount[0]);
+    this->tlmWrite_DeviceErrorCountRW0(HkTelemetryPkt.DeviceErrorCount[0]);
+    this->tlmWrite_DeviceCountRW1(HkTelemetryPkt.DeviceCount[1]);
+    this->tlmWrite_DeviceErrorCountRW1(HkTelemetryPkt.DeviceErrorCount[1]);
+    this->tlmWrite_DeviceCountRW2(HkTelemetryPkt.DeviceCount[2]);
+    this->tlmWrite_DeviceErrorCountRW2(HkTelemetryPkt.DeviceErrorCount[2]);
     // Tell the fprime command system that we have completed the processing of the supplied command with OK status
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
   }
 
   // GENERIC_REACTION_WHEEL_Set_Torque
-  void Generic_reaction_wheel :: SET_TORQUE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, const I16 wheel_num, const F64 torque) 
+  void Generic_reaction_wheel :: SET_TORQUE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, const Generic_reaction_wheel_wheelNums wheel_num, const F64 torque) 
   {
-
     int32_t status = OS_SUCCESS;
 
-    if (wheel_num > 2 || wheel_num < 0)
-    {
-      OS_printf("GENERIC_REACTION_WHEEL_SetTorque command failed, Wheel %d, invalid! Pick 0, 1, or 2.\n", wheel_num);
-      status = OS_ERROR;
-    }
-    else
-    {
-      status = SetRWTorque(&RW_UART[wheel_num], torque);
+    double scaledTorque = torque / 10000;
+
+    if(HkTelemetryPkt.DeviceEnabled[wheel_num.e] == GENERIC_RW_DEVICE_ENABLED){
+
+      status = SetRWTorque(&RW_UART[wheel_num.e], scaledTorque);
       if (status < 0)
       {   
-        this->log_ACTIVITY_HI_TELEM("SetRWTorque: Command Failed!");  
-        OS_printf("GENERIC_REACTION_WHEEL_SetTorque command failed for RW %d!\n", wheel_num);
+        char configMsg[40];
+        sprintf(configMsg, "Failed to set torque for RW%d!", wheel_num.e);
+        this->log_ACTIVITY_HI_TELEM(configMsg);  
+        OS_printf("GENERIC_REACTION_WHEEL_SetTorque command failed for RW %d!\n", wheel_num.e);
+        HkTelemetryPkt.DeviceErrorCount[wheel_num.e]++;
+        HkTelemetryPkt.CommandErrorCount++;
       }
       else
       {
-        this->log_ACTIVITY_HI_TELEM("SetRWTorque: Command Success!");  
-        OS_printf("RW %d torque successfully set to %lf\n", wheel_num, torque);
+        char configMsg[40];
+        sprintf(configMsg, "Successfully set torque for RW%d!", wheel_num.e);
+        this->log_ACTIVITY_HI_TELEM(configMsg); 
+        OS_printf("RW %d torque successfully set to %lf Nm\n", wheel_num.e, scaledTorque);
+        HkTelemetryPkt.DeviceCount[wheel_num.e]++;
+        HkTelemetryPkt.CommandCount++;
+        HkTelemetryPkt.momentum[wheel_num.e] = scaledTorque;
       }    
       
-      // Tell the fprime command system that we have completed the processing of the supplied command with OK status
-      this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
     }
+    else
+    {
+      HkTelemetryPkt.CommandErrorCount++;
+      this->log_ACTIVITY_HI_TELEM("Command Failed, Device Disabled!");  
+      OS_printf("Command Failed, Device Disabled!\n");
+      
+    }
+
+    this->tlmWrite_CommandCount(++HkTelemetryPkt.CommandCount);
+    this->tlmWrite_DeviceCountRW0(HkTelemetryPkt.DeviceCount[0]);
+    this->tlmWrite_DeviceErrorCountRW0(HkTelemetryPkt.DeviceErrorCount[0]);
+    this->tlmWrite_DeviceCountRW1(HkTelemetryPkt.DeviceCount[1]);
+    this->tlmWrite_DeviceErrorCountRW1(HkTelemetryPkt.DeviceErrorCount[1]);
+    this->tlmWrite_DeviceCountRW2(HkTelemetryPkt.DeviceCount[2]);
+    this->tlmWrite_DeviceErrorCountRW2(HkTelemetryPkt.DeviceErrorCount[2]);
+
+    this->tlmWrite_RW0_Data(HkTelemetryPkt.momentum[0]);
+    this->tlmWrite_RW1_Data(HkTelemetryPkt.momentum[1]);
+    this->tlmWrite_RW2_Data(HkTelemetryPkt.momentum[2]);
+      // Tell the fprime command system that we have completed the processing of the supplied command with OK status
+    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
     
+  }
+
+  inline Generic_reaction_wheel_ActiveState Generic_reaction_wheel :: get_active_state(uint8_t DeviceEnable)
+  {
+    Generic_reaction_wheel_ActiveState state;
+
+    if(DeviceEnable == GENERIC_RW_DEVICE_ENABLED)
+    {
+      state.e = Generic_reaction_wheel_ActiveState::ENABLED;
+    }
+    else
+    {
+      state.e = Generic_reaction_wheel_ActiveState::DISABLED;
+    }
+
+    return state;
   }
 
 }
