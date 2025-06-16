@@ -47,7 +47,7 @@ namespace Nos3
             */
             // SC[N].AC.Whl[M].H
             std::string key;
-            key.append("SC[").append(std::to_string(_sc)).append("].AC.Whl[").append(std::to_string(_reactionwheel)).append("].H");
+            key.append("SC[").append(std::to_string(_sc)).append("].Whl[").append(std::to_string(_reactionwheel)).append("].H");
 
             _momentum = std::stod(_dp.get_value_for_key(key));
         } catch (const std::exception& e) {
