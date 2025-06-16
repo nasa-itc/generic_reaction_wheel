@@ -2,6 +2,12 @@ module Components {
     @ reaction wheel device control and monitoring
     active component Generic_reaction_wheel {
 
+        @ RW output port
+        output port RWout: RWDataPort
+
+        @ Periodic Data RW
+        async input port updateData: Svc.Sched
+
         @ Command to Request Momentum from all wheels
         async command GET_MOMENTUM(
         )

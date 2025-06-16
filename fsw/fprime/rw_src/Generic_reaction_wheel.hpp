@@ -53,6 +53,11 @@ namespace Components {
         const F64 torque //!< Torque to set reaction wheel to
       ) override;
 
+      void updateData_handler(
+        const NATIVE_INT_TYPE portNum, //!< The port number
+        NATIVE_UINT_TYPE context //!< The call order
+      ) override;
+
   };
 
 }

@@ -124,9 +124,30 @@ namespace Components {
     this->tlmWrite_RW0_Data(RW0_Data);
     this->tlmWrite_RW1_Data(RW1_Data);
     this->tlmWrite_RW2_Data(RW2_Data);
+
+    this->RWout_out(0, RW0_Data, RW1_Data, RW2_Data);
     
     // Tell the fprime command system that we have completed the processing of the supplied command with OK status
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+  }
+
+  void Generic_reaction_wheel :: updateData_handler(const NATIVE_INT_TYPE portNum, NATIVE_UINT_TYPE context)
+  {
+    int32_t status = OS_SUCCESS;
+    double RW0_Data;
+    double RW1_Data;
+    double RW2_Data;
+
+    status = GetCurrentMomentum(&RW_UART[0], &RW0_Data);
+    status = GetCurrentMomentum(&RW_UART[1], &RW1_Data);
+    status = GetCurrentMomentum(&RW_UART[2], &RW2_Data);
+
+
+    this->tlmWrite_RW0_Data(RW0_Data);
+    this->tlmWrite_RW1_Data(RW1_Data);
+    this->tlmWrite_RW2_Data(RW2_Data);
+
+    this->RWout_out(0, RW0_Data, RW1_Data, RW2_Data);
   }
 
   // GENERIC_REACTION_WHEEL_Set_Torque
