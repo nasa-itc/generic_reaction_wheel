@@ -8,6 +8,9 @@ module Components {
         @ Periodic Data RW
         async input port updateData: Svc.Sched
 
+        @ RW input port
+        async input port RWin: RWOUTDataPort
+
         @ Command to Request Momentum from all wheels
         async command GET_MOMENTUM(
         )

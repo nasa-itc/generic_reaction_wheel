@@ -58,6 +58,13 @@ namespace Components {
         NATIVE_UINT_TYPE context //!< The call order
       ) override;
 
+      void RWin_handler(
+        NATIVE_INT_TYPE portNum,
+        F64 Torque0,
+        F64 Torque1,
+        F64 Torque2
+      ) override;
+
   };
 
 }

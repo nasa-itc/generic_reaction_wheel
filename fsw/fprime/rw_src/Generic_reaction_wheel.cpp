@@ -150,6 +150,18 @@ namespace Components {
     this->RWout_out(0, RW0_Data, RW1_Data, RW2_Data);
   }
 
+  void Generic_reaction_wheel :: RWin_handler( NATIVE_INT_TYPE portNum, F64 Torque0, F64 Torque1, F64 Torque2)
+  {
+    double torques[3] = {Torque0, Torque1, Torque2};
+
+    int32_t status = OS_SUCCESS;
+
+    for(int i = 0; i < 3; i++)
+    {
+      status = SetRWTorque(&RW_UART[i], torques[i]);
+    }
+  }
+
   // GENERIC_REACTION_WHEEL_Set_Torque
   void Generic_reaction_wheel :: SET_TORQUE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, const I16 wheel_num, const F64 torque) 
   {
