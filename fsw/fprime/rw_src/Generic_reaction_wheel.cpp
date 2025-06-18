@@ -68,8 +68,6 @@ namespace Components {
     }
 
     nos_destroy_link();
-
-    OS_printf("Cleanly exiting generic_reaction_wheel application...\n\n"); 
   }
 
   // ----------------------------------------------------------------------
@@ -80,7 +78,6 @@ namespace Components {
     HkTelemetryPkt.CommandCount++;
 
     this->log_ACTIVITY_HI_TELEM("NOOP command success!");
-    OS_printf("NOOP command successful!\n");
 
     this->tlmWrite_CommandCount(HkTelemetryPkt.CommandCount);
     this->tlmWrite_DeviceEnabledRW0(get_active_state(HkTelemetryPkt.DeviceEnabled[0]));
@@ -100,7 +97,6 @@ namespace Components {
     HkTelemetryPkt.DeviceErrorCount[2] = 0;
 
     this->log_ACTIVITY_HI_TELEM("Reset Counters command successful!");
-    OS_printf("Reset Counters command successful!\n");
     this->tlmWrite_CommandCount(HkTelemetryPkt.CommandCount);
     this->tlmWrite_CommandErrorCount(HkTelemetryPkt.CommandErrorCount);
 
@@ -135,7 +131,6 @@ namespace Components {
         char configMsg[40];
         sprintf(configMsg, "Enabled RW%d successfully!", wheel_num.e);
         this->log_ACTIVITY_HI_TELEM(configMsg);
-        OS_printf("Enabled RW%d successfully!\n", wheel_num.e);
       }
       else
       {
@@ -143,7 +138,6 @@ namespace Components {
         char configMsg[40];
         sprintf(configMsg, "Enable RW%d failed, uart init fail!", wheel_num.e);
         this->log_ACTIVITY_HI_TELEM(configMsg);
-        OS_printf("Enable RW%d failed, uart init fail!\n", wheel_num.e);
       }
     }
     else
@@ -152,7 +146,6 @@ namespace Components {
       char configMsg[40];
         sprintf(configMsg, "Enable RW%d failed, already enabled!", wheel_num.e);
         this->log_ACTIVITY_HI_TELEM(configMsg);
-        OS_printf("Enable RW%d failed, already enabled!\n", wheel_num.e);
     }
 
     this->tlmWrite_DeviceCountRW0(HkTelemetryPkt.DeviceCount[0]);
@@ -184,7 +177,6 @@ namespace Components {
         char configMsg[40];
         sprintf(configMsg, "Disabled RW%d successfully!", wheel_num.e);
         this->log_ACTIVITY_HI_TELEM(configMsg);
-        OS_printf("Disabled RW%d successfully!\n", wheel_num.e);
       }
       else
       {
@@ -192,7 +184,6 @@ namespace Components {
         char configMsg[40];
         sprintf(configMsg, "Disable RW%d failed, uart close fail!", wheel_num.e);
         this->log_ACTIVITY_HI_TELEM(configMsg);
-        OS_printf("Disable RW%d failed, uart close fail!\n", wheel_num.e);
       }
     }
     else
@@ -201,7 +192,6 @@ namespace Components {
       char configMsg[40];
         sprintf(configMsg, "Disable RW%d failed, already Disabled!", wheel_num.e);
         this->log_ACTIVITY_HI_TELEM(configMsg);
-        OS_printf("Disable RW%d failed, already Disabled!\n", wheel_num.e);
     }
 
     this->tlmWrite_DeviceCountRW0(HkTelemetryPkt.DeviceCount[0]);
@@ -233,7 +223,6 @@ namespace Components {
         char configMsg[40];
         sprintf(configMsg, "Failed to get momentum for RW%d!", i);
         this->log_ACTIVITY_HI_TELEM(configMsg);
-        OS_printf("Failed to get momentum for RW%d!\n", i);
         HkTelemetryPkt.DeviceErrorCount[i]++;
       }
       else
@@ -241,7 +230,6 @@ namespace Components {
         char configMsg[40];
         sprintf(configMsg, "Successfully got momentum for RW%d!", i);
         this->log_ACTIVITY_HI_TELEM(configMsg);
-        OS_printf("Successfully got momentum for RW%d!\n", i);
         HkTelemetryPkt.DeviceCount[i]++;
       }
 
@@ -288,7 +276,6 @@ namespace Components {
         char configMsg[40];
         sprintf(configMsg, "Failed to set torque for RW%d!", wheel_num.e);
         this->log_ACTIVITY_HI_TELEM(configMsg);  
-        OS_printf("GENERIC_REACTION_WHEEL_SetTorque command failed for RW %d!\n", wheel_num.e);
         HkTelemetryPkt.DeviceErrorCount[wheel_num.e]++;
         HkTelemetryPkt.CommandErrorCount++;
       }
@@ -297,7 +284,6 @@ namespace Components {
         char configMsg[40];
         sprintf(configMsg, "Successfully set torque for RW%d!", wheel_num.e);
         this->log_ACTIVITY_HI_TELEM(configMsg); 
-        OS_printf("RW %d torque successfully set to %lf Nm\n", wheel_num.e, scaledTorque);
         HkTelemetryPkt.DeviceCount[wheel_num.e]++;
         HkTelemetryPkt.CommandCount++;
         HkTelemetryPkt.momentum[wheel_num.e] = scaledTorque;
@@ -307,9 +293,7 @@ namespace Components {
     else
     {
       HkTelemetryPkt.CommandErrorCount++;
-      this->log_ACTIVITY_HI_TELEM("Command Failed, Device Disabled!");  
-      OS_printf("Command Failed, Device Disabled!\n");
-      
+      this->log_ACTIVITY_HI_TELEM("Command Failed, Device Disabled!");      
     }
 
     this->tlmWrite_CommandCount(++HkTelemetryPkt.CommandCount);
