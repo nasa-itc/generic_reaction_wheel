@@ -8,6 +8,31 @@
 #define Components_Generic_reaction_wheel_HPP
 
 #include "rw_src/Generic_reaction_wheelComponentAc.hpp"
+#include "rw_src/Generic_reaction_wheel_ActiveStateEnumAc.hpp"
+#include "rw_src/Generic_reaction_wheel_wheelNumsEnumAc.hpp"
+
+extern "C"{
+#include "generic_reaction_wheel_device.h"
+#include "libuart.h"
+}
+
+#include "nos_link.h"
+
+#define RW_NUM 3
+
+typedef struct
+{
+    uint8_t                         CommandCount;
+    uint8_t                         CommandErrorCount;
+    uint8_t                         DeviceCount[RW_NUM];
+    uint8_t                         DeviceErrorCount[RW_NUM];
+    uint8_t                         DeviceEnabled[RW_NUM];
+    double                          momentum[RW_NUM];
+} RW_Hk_tlm_t;
+#define RW_HK_TLM_LNGTH sizeof(RW_Hk_tlm_t)
+
+#define GENERIC_RW_DEVICE_DISABLED 0
+#define GENERIC_RW_DEVICE_ENABLED  1
 
 namespace Components {
 
@@ -16,6 +41,14 @@ namespace Components {
   {
 
     public:
+
+    uart_info_t RW_UART[RW_NUM] = {
+      {.deviceString = &GENERIC_REACTION_WHEEL_1_CFG_STRING[0], .handle = GENERIC_REACTION_WHEEL_1_CFG_HANDLE, .isOpen = GENERIC_REACTION_WHEEL_1_CFG_IS_OPEN, .baud = GENERIC_REACTION_WHEEL_1_CFG_BAUDRATE_HZ},
+      {.deviceString = &GENERIC_REACTION_WHEEL_2_CFG_STRING[0], .handle = GENERIC_REACTION_WHEEL_2_CFG_HANDLE, .isOpen = GENERIC_REACTION_WHEEL_2_CFG_IS_OPEN, .baud = GENERIC_REACTION_WHEEL_2_CFG_BAUDRATE_HZ},
+      {.deviceString = &GENERIC_REACTION_WHEEL_3_CFG_STRING[0], .handle = GENERIC_REACTION_WHEEL_3_CFG_HANDLE, .isOpen = GENERIC_REACTION_WHEEL_3_CFG_IS_OPEN, .baud = GENERIC_REACTION_WHEEL_3_CFG_BAUDRATE_HZ},
+    };
+
+    RW_Hk_tlm_t HkTelemetryPkt;
 
       // ----------------------------------------------------------------------
       // Component construction and destruction
@@ -35,21 +68,37 @@ namespace Components {
       // Handler implementations for commands
       // ----------------------------------------------------------------------
 
-      //! Handler implementation for command GET_MOMENTUM
-      //!
-      //! Gets the Momentum Values from all 3 reaction wheels
-      void GET_MOMENTUM_cmdHandler(
+      void NOOP_cmdHandler(
+        FwOpcodeType opCode, 
+        U32 cmdSeq
+      ) override;
+
+      void ENABLE_cmdHandler(
+        FwOpcodeType opCode, 
+        U32 cmdSeq,
+        const Generic_reaction_wheel_wheelNums wheel_num
+      ) override;
+
+      void DISABLE_cmdHandler(
+        FwOpcodeType opCode, 
+        U32 cmdSeq,
+        const Generic_reaction_wheel_wheelNums wheel_num
+      ) override;
+
+      void RESET_COUNTERS_cmdHandler(
+        FwOpcodeType opCode, 
+        U32 cmdSeq
+      ) override;
+
+      void REQUEST_DATA_cmdHandler(
         FwOpcodeType opCode, 
         U32 cmdSeq
       ) override;
       
-      //! Handler implementation for command SET_TORQUE
-      //!
-      //! Sets the torque of a given reaction wheel. Takes input of reaction wheel number (0-2) and torque
       void SET_TORQUE_cmdHandler(
         FwOpcodeType opCode, //!< The opcode
         U32 cmdSeq, //!< The command sequence number
-        const I16 wheel_num, //!< Reaction Wheel Number to set torque of
+        const Generic_reaction_wheel_wheelNums wheel_num, //!< Reaction Wheel Number to set torque of
         const F64 torque //!< Torque to set reaction wheel to
       ) override;
 
@@ -64,6 +113,8 @@ namespace Components {
         F64 Torque1,
         F64 Torque2
       ) override;
+      
+      inline Generic_reaction_wheel_ActiveState get_active_state(uint8_t DeviceEnabled);
 
   };
 

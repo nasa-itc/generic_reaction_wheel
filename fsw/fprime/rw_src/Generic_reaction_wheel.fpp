@@ -10,16 +10,45 @@ module Components {
 
         @ RW input port
         async input port RWin: RWOUTDataPort
+        
+        @ Component Enable State
+        enum ActiveState {
+            DISABLED @< DISABLED
+            ENABLED @< ENABLED
+        }
+
+        enum wheelNums {
+            RW0 @< Reaction Wheel 0
+            RW1 @< Reaction Wheel 1
+            RW2 @< Reaction Wheel 2
+        }
 
         @ Command to Request Momentum from all wheels
-        async command GET_MOMENTUM(
+        async command REQUEST_DATA(
         )
 
         @ Command to Set Reaction Wheel Torque
         async command SET_TORQUE(
-            wheel_num: I16 @< Reaction Wheel Number (0-2) to set torque of
-            torque: F64 @< Torque to set reaction wheel to
+            wheel_num: wheelNums @< Reaction Wheel Number (0-2) to set torque of
+            torque: F64 @< Torque to set reaction wheel to in 10^-4 Nm
         )
+
+        @ NOOP Command
+        async command NOOP(
+        )
+
+        @ Enable Cmd
+        async command ENABLE(
+            wheel_num: wheelNums @< RW Numbers (0-2)
+        )
+
+        @ Disable Cmd
+        async command DISABLE(
+            wheel_num: wheelNums @< RW Numbers (0-2)
+        )
+
+        @ Reset Counters Cmd
+        async command RESET_COUNTERS()
 
         @ event with maximum greeting length of 30 characters
         event TELEM(
@@ -34,6 +63,39 @@ module Components {
 
         @ Momentum of Reaction Wheel 2
         telemetry RW2_Data: F64
+
+        @ Command Count
+        telemetry CommandCount: U32
+
+        @ Command Error Count
+        telemetry CommandErrorCount: U32
+
+        @ Device Count
+        telemetry DeviceCountRW0: U32
+
+        @ Device Error Count
+        telemetry DeviceErrorCountRW0: U32
+
+        @ Device Enabled
+        telemetry DeviceEnabledRW0: ActiveState
+
+        @ Device Count
+        telemetry DeviceCountRW1: U32
+
+        @ Device Error Count
+        telemetry DeviceErrorCountRW1: U32
+
+        @ Device Enabled
+        telemetry DeviceEnabledRW1: ActiveState
+
+        @ Device Count
+        telemetry DeviceCountRW2: U32
+
+        @ Device Error Count
+        telemetry DeviceErrorCountRW2: U32
+
+        @ Device Enabled
+        telemetry DeviceEnabledRW2: ActiveState
 
         ##############################################################################
         #### Uncomment the following examples to start customizing your component ####
