@@ -43,10 +43,10 @@ namespace Components {
     	OS_printf("GENERIC_RW Checkout: UART 2 port initialization error!\n");
     } 
 
-    for ( int i = 0; i < RW_NUM; i++ )
-    {
-        uart_close_port(&RW_UART[i]);
-    }
+    // for ( int i = 0; i < RW_NUM; i++ )
+    // {
+    //     uart_close_port(&RW_UART[i]);
+    // }
 
     HkTelemetryPkt.CommandCount = 0;
     HkTelemetryPkt.CommandErrorCount = 0;
@@ -54,7 +54,7 @@ namespace Components {
     for(int i = 0; i < RW_NUM; i++){
       HkTelemetryPkt.DeviceCount[i] = 0;
       HkTelemetryPkt.DeviceErrorCount[i] = 0;
-      HkTelemetryPkt.DeviceEnabled[i] = GENERIC_RW_DEVICE_DISABLED;
+      HkTelemetryPkt.DeviceEnabled[i] = GENERIC_RW_DEVICE_ENABLED;
     }
   }
 
