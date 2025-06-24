@@ -159,6 +159,9 @@ namespace Components {
     this->tlmWrite_DeviceCountRW2(HkTelemetryPkt.DeviceCount[2]);
     this->tlmWrite_DeviceErrorCountRW2(HkTelemetryPkt.DeviceErrorCount[2]);
     this->tlmWrite_DeviceEnabledRW2(get_active_state(HkTelemetryPkt.DeviceEnabled[2]));
+
+    this->tlmWrite_CommandCount(HkTelemetryPkt.CommandCount);
+    this->tlmWrite_CommandErrorCount(HkTelemetryPkt.CommandErrorCount);
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
   }
 
@@ -206,6 +209,9 @@ namespace Components {
     this->tlmWrite_DeviceErrorCountRW2(HkTelemetryPkt.DeviceErrorCount[2]);
     this->tlmWrite_DeviceEnabledRW2(get_active_state(HkTelemetryPkt.DeviceEnabled[2]));
 
+    this->tlmWrite_CommandCount(HkTelemetryPkt.CommandCount);
+    this->tlmWrite_CommandErrorCount(HkTelemetryPkt.CommandErrorCount);
+
 
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
   }
@@ -251,6 +257,7 @@ namespace Components {
     }
     
     this->tlmWrite_CommandCount(++HkTelemetryPkt.CommandCount);
+    this->tlmWrite_CommandErrorCount(HkTelemetryPkt.CommandErrorCount);
     this->tlmWrite_DeviceCountRW0(HkTelemetryPkt.DeviceCount[0]);
     this->tlmWrite_DeviceErrorCountRW0(HkTelemetryPkt.DeviceErrorCount[0]);
     this->tlmWrite_DeviceCountRW1(HkTelemetryPkt.DeviceCount[1]);
@@ -297,6 +304,7 @@ namespace Components {
     }
 
     this->tlmWrite_CommandCount(++HkTelemetryPkt.CommandCount);
+    this->tlmWrite_CommandErrorCount(HkTelemetryPkt.CommandErrorCount);
     this->tlmWrite_DeviceCountRW0(HkTelemetryPkt.DeviceCount[0]);
     this->tlmWrite_DeviceErrorCountRW0(HkTelemetryPkt.DeviceErrorCount[0]);
     this->tlmWrite_DeviceCountRW1(HkTelemetryPkt.DeviceCount[1]);
