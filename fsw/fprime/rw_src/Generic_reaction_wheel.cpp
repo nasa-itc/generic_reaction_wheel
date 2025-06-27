@@ -313,7 +313,6 @@ namespace Components {
         this->log_ACTIVITY_HI_TELEM(configMsg); 
         HkTelemetryPkt.DeviceCount[wheel_num.e]++;
         HkTelemetryPkt.CommandCount++;
-        HkTelemetryPkt.momentum[wheel_num.e] = scaledTorque;
       }    
       
     }
