@@ -272,12 +272,11 @@ namespace Components {
   {
     int32_t status = OS_SUCCESS;
 
-    typedef void (Generic_reaction_wheel::*tlmFunc)(F64 arg, Fw::Time);
-    tlmFunc tlmArray[3] = {&Generic_reaction_wheel::tlmWrite_RW0_Data, &Generic_reaction_wheel::tlmWrite_RW1_Data, &Generic_reaction_wheel::tlmWrite_RW2_Data};
+    // typedef void (Generic_reaction_wheel::*tlmFunc)(F64 arg, Fw::Time);
+    // tlmFunc tlmArray[3] = {&Generic_reaction_wheel::tlmWrite_RW0_Data, &Generic_reaction_wheel::tlmWrite_RW1_Data, &Generic_reaction_wheel::tlmWrite_RW2_Data};
 
     for(int i = 0; i < 3; i++){
       status = GetCurrentMomentum(&RW_UART[i], &HkTelemetryPkt.momentum[i]);
-      (this->*tlmArray[i])(HkTelemetryPkt.momentum[i], Fw::Time());
     }
 
     this->RWout_out(0, HkTelemetryPkt.momentum[0], HkTelemetryPkt.momentum[1], HkTelemetryPkt.momentum[2]);
