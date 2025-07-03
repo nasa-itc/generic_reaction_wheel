@@ -9,6 +9,7 @@
 */
 #include "rw_src/Generic_reaction_wheel.hpp"
 #include "FpConfig.hpp"
+#include <Fw/Log/LogString.hpp>
 
 
 namespace Components {
@@ -77,7 +78,8 @@ namespace Components {
   void Generic_reaction_wheel :: NOOP_cmdHandler(FwOpcodeType opCode, U32 cmdSeq){
     HkTelemetryPkt.CommandCount++;
 
-    this->log_ACTIVITY_HI_TELEM("NOOP command success!");
+    Fw::LogStringArg log_msg("NOOP command success!");
+    this->log_ACTIVITY_HI_TELEM(log_msg);
 
     this->tlmWrite_CommandCount(HkTelemetryPkt.CommandCount);
     this->tlmWrite_DeviceEnabledRW0(get_active_state(HkTelemetryPkt.DeviceEnabled[0]));
@@ -96,7 +98,8 @@ namespace Components {
     HkTelemetryPkt.DeviceCount[2] = 0;
     HkTelemetryPkt.DeviceErrorCount[2] = 0;
 
-    this->log_ACTIVITY_HI_TELEM("Reset Counters command successful!");
+    Fw::LogStringArg log_msg("Reset Counters command successful!");
+    this->log_ACTIVITY_HI_TELEM(log_msg);
     this->tlmWrite_CommandCount(HkTelemetryPkt.CommandCount);
     this->tlmWrite_CommandErrorCount(HkTelemetryPkt.CommandErrorCount);
 
@@ -130,14 +133,16 @@ namespace Components {
         HkTelemetryPkt.DeviceEnabled[wheel_num.e] = GENERIC_RW_DEVICE_ENABLED;
         char configMsg[40];
         sprintf(configMsg, "Enabled RW%d successfully!", wheel_num.e);
-        this->log_ACTIVITY_HI_TELEM(configMsg);
+        Fw::LogStringArg log_msg(configMsg);
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
       else
       {
         HkTelemetryPkt.DeviceErrorCount[wheel_num.e]++;
         char configMsg[40];
         sprintf(configMsg, "Enable RW%d failed, uart init fail!", wheel_num.e);
-        this->log_ACTIVITY_HI_TELEM(configMsg);
+        Fw::LogStringArg log_msg(configMsg);
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
     }
     else
@@ -145,7 +150,8 @@ namespace Components {
       HkTelemetryPkt.CommandErrorCount++;
       char configMsg[40];
         sprintf(configMsg, "Enable RW%d failed, already enabled!", wheel_num.e);
-        this->log_ACTIVITY_HI_TELEM(configMsg);
+        Fw::LogStringArg log_msg(configMsg);
+        this->log_ACTIVITY_HI_TELEM(log_msg);
     }
 
     this->tlmWrite_DeviceCountRW0(HkTelemetryPkt.DeviceCount[0]);
@@ -179,14 +185,16 @@ namespace Components {
         HkTelemetryPkt.DeviceEnabled[wheel_num.e] = GENERIC_RW_DEVICE_DISABLED;
         char configMsg[40];
         sprintf(configMsg, "Disabled RW%d successfully!", wheel_num.e);
-        this->log_ACTIVITY_HI_TELEM(configMsg);
+        Fw::LogStringArg log_msg(configMsg);
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
       else
       {
         HkTelemetryPkt.DeviceErrorCount[wheel_num.e]++;
         char configMsg[40];
         sprintf(configMsg, "Disable RW%d failed, uart close fail!", wheel_num.e);
-        this->log_ACTIVITY_HI_TELEM(configMsg);
+        Fw::LogStringArg log_msg(configMsg);
+        this->log_ACTIVITY_HI_TELEM(log_msg);
       }
     }
     else
@@ -194,7 +202,8 @@ namespace Components {
       HkTelemetryPkt.CommandErrorCount++;
       char configMsg[40];
         sprintf(configMsg, "Disable RW%d failed, already Disabled!", wheel_num.e);
-        this->log_ACTIVITY_HI_TELEM(configMsg);
+        Fw::LogStringArg log_msg(configMsg);
+        this->log_ACTIVITY_HI_TELEM(log_msg);
     }
 
     this->tlmWrite_DeviceCountRW0(HkTelemetryPkt.DeviceCount[0]);
@@ -228,14 +237,16 @@ namespace Components {
       {
         char configMsg[40];
         sprintf(configMsg, "Failed to get momentum for RW%d!", i);
-        this->log_ACTIVITY_HI_TELEM(configMsg);
+        Fw::LogStringArg log_msg(configMsg);
+        this->log_ACTIVITY_HI_TELEM(log_msg);
         HkTelemetryPkt.DeviceErrorCount[i]++;
       }
       else
       {
         char configMsg[40];
         sprintf(configMsg, "Successfully got momentum for RW%d!", i);
-        this->log_ACTIVITY_HI_TELEM(configMsg);
+        Fw::LogStringArg log_msg(configMsg);
+        this->log_ACTIVITY_HI_TELEM(log_msg);
         HkTelemetryPkt.DeviceCount[i]++;
       }
 
@@ -282,7 +293,8 @@ namespace Components {
       {   
         char configMsg[40];
         sprintf(configMsg, "Failed to set torque for RW%d!", wheel_num.e);
-        this->log_ACTIVITY_HI_TELEM(configMsg);  
+        Fw::LogStringArg log_msg(configMsg);
+        this->log_ACTIVITY_HI_TELEM(log_msg);  
         HkTelemetryPkt.DeviceErrorCount[wheel_num.e]++;
         HkTelemetryPkt.CommandErrorCount++;
       }
@@ -290,7 +302,8 @@ namespace Components {
       {
         char configMsg[40];
         sprintf(configMsg, "Successfully set torque for RW%d!", wheel_num.e);
-        this->log_ACTIVITY_HI_TELEM(configMsg); 
+        Fw::LogStringArg log_msg(configMsg);
+        this->log_ACTIVITY_HI_TELEM(log_msg); 
         HkTelemetryPkt.DeviceCount[wheel_num.e]++;
         HkTelemetryPkt.CommandCount++;
         HkTelemetryPkt.momentum[wheel_num.e] = scaledTorque;
@@ -300,7 +313,8 @@ namespace Components {
     else
     {
       HkTelemetryPkt.CommandErrorCount++;
-      this->log_ACTIVITY_HI_TELEM("Command Failed, Device Disabled!");      
+      Fw::LogStringArg log_msg("Command Failed, Device Disabled!");
+      this->log_ACTIVITY_HI_TELEM(log_msg);      
     }
 
     this->tlmWrite_CommandCount(++HkTelemetryPkt.CommandCount);
