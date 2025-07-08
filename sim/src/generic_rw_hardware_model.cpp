@@ -171,7 +171,7 @@ namespace Nos3
                 sim_logger->error("Invalid torque command value");
             }
             std::stringstream ss;
-            ss << "SC[0].AC.Whl[" << _wheel_number << "].Tcmd = ";
+            ss << "SC[0].Whl[" << _wheel_number << "].Tcmd = ";
             ss << torque;
 
             dynamic_cast<GenericRWData42SocketProvider*>(_sdp)->send_command_to_socket(ss.str());
