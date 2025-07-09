@@ -273,6 +273,15 @@ namespace Components {
     int32_t status = OS_SUCCESS;
     for(int i = 0; i < 3; i++){
       status = GetCurrentMomentum(&RW_UART[i], &HkTelemetryPkt.momentum[i]);
+
+      if(status < 0)
+      {
+        HkTelemetryPkt.DeviceErrorCount[i]++;
+      }
+      else
+      {
+        HkTelemetryPkt.DeviceCount[i]++;
+      }
     }
 
     this->RWout_out(0, HkTelemetryPkt.momentum[0], HkTelemetryPkt.momentum[1], HkTelemetryPkt.momentum[2]);
@@ -280,7 +289,7 @@ namespace Components {
 
   void Generic_reaction_wheel :: updateTlm_handler(const NATIVE_INT_TYPE portNum, NATIVE_UINT_TYPE context)
   {
-    this->tlmWrite_CommandCount(++HkTelemetryPkt.CommandCount);
+    this->tlmWrite_CommandCount(HkTelemetryPkt.CommandCount);
     this->tlmWrite_CommandErrorCount(HkTelemetryPkt.CommandErrorCount);
     this->tlmWrite_DeviceCountRW0(HkTelemetryPkt.DeviceCount[0]);
     this->tlmWrite_DeviceErrorCountRW0(HkTelemetryPkt.DeviceErrorCount[0]);
@@ -302,6 +311,15 @@ namespace Components {
     for(int i = 0; i < 3; i++)
     {
       status = SetRWTorque(&RW_UART[i], torques[i]);
+
+      if(status < 0)
+      {
+        HkTelemetryPkt.DeviceErrorCount[i]++;
+      }
+      else
+      {
+        HkTelemetryPkt.DeviceCount[i]++;
+      }
     }
   }
 
