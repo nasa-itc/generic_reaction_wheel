@@ -271,15 +271,26 @@ namespace Components {
   void Generic_reaction_wheel :: updateData_handler(const NATIVE_INT_TYPE portNum, NATIVE_UINT_TYPE context)
   {
     int32_t status = OS_SUCCESS;
-
-    // typedef void (Generic_reaction_wheel::*tlmFunc)(F64 arg, Fw::Time);
-    // tlmFunc tlmArray[3] = {&Generic_reaction_wheel::tlmWrite_RW0_Data, &Generic_reaction_wheel::tlmWrite_RW1_Data, &Generic_reaction_wheel::tlmWrite_RW2_Data};
-
     for(int i = 0; i < 3; i++){
       status = GetCurrentMomentum(&RW_UART[i], &HkTelemetryPkt.momentum[i]);
     }
 
     this->RWout_out(0, HkTelemetryPkt.momentum[0], HkTelemetryPkt.momentum[1], HkTelemetryPkt.momentum[2]);
+  }
+
+  void Generic_reaction_wheel :: updateTlm_handler(const NATIVE_INT_TYPE portNum, NATIVE_UINT_TYPE context)
+  {
+    this->tlmWrite_CommandCount(++HkTelemetryPkt.CommandCount);
+    this->tlmWrite_CommandErrorCount(HkTelemetryPkt.CommandErrorCount);
+    this->tlmWrite_DeviceCountRW0(HkTelemetryPkt.DeviceCount[0]);
+    this->tlmWrite_DeviceErrorCountRW0(HkTelemetryPkt.DeviceErrorCount[0]);
+    this->tlmWrite_DeviceCountRW1(HkTelemetryPkt.DeviceCount[1]);
+    this->tlmWrite_DeviceErrorCountRW1(HkTelemetryPkt.DeviceErrorCount[1]);
+    this->tlmWrite_DeviceCountRW2(HkTelemetryPkt.DeviceCount[2]);
+    this->tlmWrite_DeviceErrorCountRW2(HkTelemetryPkt.DeviceErrorCount[2]);
+    this->tlmWrite_RW0_Data(HkTelemetryPkt.momentum[0]);
+    this->tlmWrite_RW1_Data(HkTelemetryPkt.momentum[1]);
+    this->tlmWrite_RW2_Data(HkTelemetryPkt.momentum[2]);
   }
 
   void Generic_reaction_wheel :: RWin_handler( NATIVE_INT_TYPE portNum, F64 Torque0, F64 Torque1, F64 Torque2)

@@ -107,6 +107,11 @@ namespace Components {
         NATIVE_UINT_TYPE context //!< The call order
       ) override;
 
+      void updateTlm_handler(
+        const NATIVE_INT_TYPE portNum, //!< The port number
+        NATIVE_UINT_TYPE context //!< The call order
+      ) override;
+
       void RWin_handler(
         NATIVE_INT_TYPE portNum,
         F64 Torque0,

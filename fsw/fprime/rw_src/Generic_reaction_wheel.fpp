@@ -8,6 +8,9 @@ module Components {
         @ Periodic Data RW
         async input port updateData: Svc.Sched
 
+        @ Periodic Tlm RW
+        async input port updateTlm: Svc.Sched
+
         @ RW input port
         async input port RWin: RWOUTDataPort
         
