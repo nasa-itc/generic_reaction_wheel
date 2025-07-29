@@ -18,11 +18,12 @@ int32_t GetCurrentMomentum(uart_info_t *wheel, double *momentum)
 {
     uint8_t DataBuffer[1024];
     int32_t DataLen;
-    char *reply;
+    char   *reply;
 
-    char *request = "CURRENT_MOMENTUM";
-    int32_t status = uart_write_port(wheel, (uint8_t*)request, strlen(request));
-    if (status < 0) {
+    char   *request = "CURRENT_MOMENTUM";
+    int32_t status  = uart_write_port(wheel, (uint8_t *)request, strlen(request));
+    if (status < 0)
+    {
         OS_printf("GetCurrentMomentum: Error writing to UART=%d\n", status);
     }
     /* check how many bytes are waiting on the uart */
@@ -31,14 +32,20 @@ int32_t GetCurrentMomentum(uart_info_t *wheel, double *momentum)
     {
         /* grab the bytes */
         status = uart_read_port(wheel, DataBuffer, DataLen);
-        if (status < 0) {
-           OS_printf("GetCurrentMomentum: Error reading from UART=%d\n", status);
-        } else {
+        if (status < 0)
+        {
+            OS_printf("GetCurrentMomentum: Error reading from UART=%d\n", status);
+        }
+        else
+        {
             DataBuffer[DataLen] = 0; // Ensure null termination
-            reply = (char *)DataBuffer;
-            if (strncmp(reply, "CURRENT_MOMENTUM=", 17) == 0) {
+            reply               = (char *)DataBuffer;
+            if (strncmp(reply, "CURRENT_MOMENTUM=", 17) == 0)
+            {
                 *momentum = atof(&reply[17]);
-            } else {
+            }
+            else
+            {
                 status = 0;
             }
         }
@@ -52,17 +59,20 @@ int32_t GetCurrentMomentum(uart_info_t *wheel, double *momentum)
 /* SetRWTorque();                                                             */
 /*                                                                            */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
-int32_t SetRWTorque( uart_info_t *wheel, double torque )
+int32_t SetRWTorque(uart_info_t *wheel, double torque)
 {
     int32_t status;
-    char request[22];
+    char    request[22];
 
     sprintf(request, "SET_TORQUE=%10.4f", torque);
-    status = uart_write_port(wheel, (uint8_t*)request, strlen(request));
-    //OS_printf("Generic Reaction Wheel: Sending command:%s\n", request);
-    if (status < 0) {
+    status = uart_write_port(wheel, (uint8_t *)request, strlen(request));
+    // OS_printf("Generic Reaction Wheel: Sending command:%s\n", request);
+    if (status < 0)
+    {
         OS_printf("Generic Reaction Wheel: Error writing to UART=%d\n", status);
-    } else {
+    }
+    else
+    {
         /* Read the reply */
         uint8_t DataBuffer[1024];
         int32_t DataLen;
@@ -72,7 +82,13 @@ int32_t SetRWTorque( uart_info_t *wheel, double torque )
         {
             uart_read_port(wheel, DataBuffer, DataLen);
             DataBuffer[DataLen] = 0; // Ensure null termination
-            //OS_printf("Generic Reaction Wheel: Response on UART=%s\n", (char *)DataBuffer);
+            // OS_printf("Generic Reaction Wheel: Response on UART=%s\n", (char *)DataBuffer);
+        }
+        else if (DataLen == 0)
+        {
+            // Datalen should be greater than 0 bytes if not sim response is not operating correctly
+            // OS_printf("Generic Reaction Wheel: Response on Uart is %d bytes", DataLen);
+            status = OS_ERROR;
         }
     }
 

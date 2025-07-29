@@ -26,7 +26,10 @@
 #include "generic_reaction_wheel_device.h"
 
 /***********************************************************************/
-#define GENERIC_RW_PIPE_DEPTH                     32 /* Depth of the Command Pipe for Application */
+#define GENERIC_RW_PIPE_DEPTH 32 /* Depth of the Command Pipe for Application */
+
+#define GENERIC_RW_DEVICE_DISABLED 0
+#define GENERIC_RW_DEVICE_ENABLED  1
 
 /************************************************************************
 ** Type Definitions
@@ -40,7 +43,7 @@ typedef struct
     /*
     ** Housekeeping telemetry packet...
     */
-    GENERIC_RW_HkTlm_t  HkTlm;
+    GENERIC_RW_HkTlm_t HkTlm;
 
     /*
     ** Run Status variable used in the main processing loop
@@ -51,15 +54,15 @@ typedef struct
     ** Operational data (not reported in housekeeping)...
     */
     CFE_SB_PipeId_t    CommandPipe;
-    CFE_MSG_Message_t *    MsgPtr;
+    CFE_MSG_Message_t *MsgPtr;
 
     /*
     ** Initialization data (not reported in housekeeping)...
     */
-    char     PipeName[16];
-    uint16   PipeDepth;
+    char   PipeName[16];
+    uint16 PipeDepth;
 
-    CFE_EVS_BinFilter_t  EventFilters[GENERIC_RW_EVENT_COUNTS];
+    CFE_EVS_BinFilter_t EventFilters[GENERIC_RW_EVENT_COUNTS];
 
 } GENERIC_RW_AppData_t;
 
@@ -72,14 +75,16 @@ typedef struct
 */
 void  RW_AppMain(void);
 int32 GENERIC_RW_AppInit(void);
-void  GENERIC_RW_ProcessCommandPacket(CFE_MSG_Message_t * Msg);
-void  GENERIC_RW_ProcessGroundCommand(CFE_MSG_Message_t * Msg);
+void  GENERIC_RW_ProcessCommandPacket(CFE_MSG_Message_t *Msg);
+void  GENERIC_RW_ProcessGroundCommand(CFE_MSG_Message_t *Msg);
 int32 GENERIC_RW_ReportHousekeeping(void);
 int32 GENERIC_RW_ResetCounters(const GENERIC_RW_ResetCounters_t *Msg);
 int32 GENERIC_RW_Noop(const GENERIC_RW_Noop_t *Msg);
-int32 GENERIC_RW_Current_Momentum(const GENERIC_RW_Noop_t *Msg );
+int32 GENERIC_RW_REQ_DATA(void);
 int32 GENERIC_RW_Set_Torque(const GENERIC_RW_Cmd_t *Msg);
+void  GENERIC_RW_Disable(const GENERIC_RW_Cmd_t *Msg);
+void  GENERIC_RW_Enable(const GENERIC_RW_Cmd_t *Msg);
 
-bool  GENERIC_RW_VerifyCmdLength(CFE_MSG_Message_t * Msg, uint16 ExpectedLength);
+bool GENERIC_RW_VerifyCmdLength(CFE_MSG_Message_t *Msg, uint16 ExpectedLength);
 
 #endif /* _generic_reaction_wheel_app_h_ */

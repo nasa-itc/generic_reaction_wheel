@@ -28,7 +28,7 @@ namespace Nos3
 
     extern ItcLogger::Logger *sim_logger;
 
-    GenericRWHardwareModel::GenericRWHardwareModel(const boost::property_tree::ptree& config) : SimIHardwareModel(config), _keep_running(true)
+    GenericRWHardwareModel::GenericRWHardwareModel(const boost::property_tree::ptree& config) : SimIHardwareModel(config), _enabled(RW_SIM_SUCCESS)
     {
         sim_logger->trace("GenericRWHardwareModel::GenericRWHardwareModel:  Constructor executing");
 
@@ -100,28 +100,61 @@ namespace Nos3
     {
         int i = 0;
         boost::shared_ptr<SimIDataPoint> dp;
-        while(_keep_running) 
+        int cnt = 0;
+        while(1)
         {
-            sim_logger->trace("GenericRWHardwareModel::run:  Loop count %d, time %f", i++,
-                _absolute_start_time + (double(_time_bus->get_time() * _sim_microseconds_per_tick)) / 1000000.0);
-            sleep(5);
+
+            if(_enabled==RW_SIM_SUCCESS)
+            {
+                sim_logger->trace("GenericRWHardwareModel::run:  Loop count %d, time %f", i++,
+                    _absolute_start_time + (double(_time_bus->get_time() * _sim_microseconds_per_tick)) / 1000000.0);
+                sleep(5);
+            }
+            else 
+            {
+                if(cnt>10)
+                {
+                    sim_logger->debug("GenericRWHardwareModel::uart_read_callback:  RW sim disabled!\n");
+                    cnt=0;
+                }
+                else
+                {
+                    cnt++;
+                }
+                sleep(1);
+                
+            }
         }
     }
 
     void GenericRWHardwareModel::uart_read_callback(const uint8_t *buf, size_t len)
     {
+        std::uint8_t valid = RW_SIM_SUCCESS;
+        // std::vector<uint8_t> error_data(1);
+        // error_data[0] = 0;
+
         // Get the data out of the message bytes
         std::vector<uint8_t> in_data(buf, buf + len);
         std::string request = SimIHardwareModel::uint8_vector_to_ascii_string(in_data);
         sim_logger->debug("GenericRWHardwareModel::uart_read_callback:  REQUEST %s", request.c_str()); // log data in a man readable format
+        
+        if (_enabled != RW_SIM_SUCCESS)
+        {
+            sim_logger->debug("GenericRWHardwareModel::uart_read_callback:  RW sim disabled!\n");
+            valid = RW_SIM_ERROR;
+        }
+        
+        if(valid==RW_SIM_SUCCESS)
+        {
+            // Figure out how to respond
+            std::string response = handle_command(request);
 
-        // Figure out how to respond
-        std::string response = handle_command(request);
-
-        // Ship the message bytes off
-        std::vector<uint8_t> out_data = SimIHardwareModel::ascii_string_to_uint8_vector(response);
-        sim_logger->debug("GenericRWHardwareModel::uart_read_callback:  REPLY   %s\n", response.c_str()); // log data in a man readable format
-        _uart_connection->write(&out_data[0], out_data.size());
+            // Ship the message bytes off
+            std::vector<uint8_t> out_data = SimIHardwareModel::ascii_string_to_uint8_vector(response);
+            sim_logger->debug("GenericRWHardwareModel::uart_read_callback:  REPLY   %s\n", response.c_str()); // log data in a man readable format
+            _uart_connection->write(&out_data[0], out_data.size());
+        }
+        
     }
 
     std::string GenericRWHardwareModel::handle_command(std::string command)
@@ -138,7 +171,7 @@ namespace Nos3
                 sim_logger->error("Invalid torque command value");
             }
             std::stringstream ss;
-            ss << "SC[0].AC.Whl[" << _wheel_number << "].Tcmd = ";
+            ss << "SC[0].Whl[" << _wheel_number << "].Tcmd = ";
             ss << torque;
 
             dynamic_cast<GenericRWData42SocketProvider*>(_sdp)->send_command_to_socket(ss.str());
@@ -161,13 +194,19 @@ namespace Nos3
 
         // Do something with the data
         std::string command = dbf.data;
-        std::string response = "GenericRWHardwareModel::command_callback:  INVALID COMMAND! (Try STOP RWSIM)";
+        std::string response = "GenericRWHardwareModel::command_callback:  INVALID COMMAND! (Try DISABLE)";
         boost::to_upper(command);
-        if (command.substr(0,11).compare("STOP RWSIM") == 0) 
+        if (command.compare(0,7,"DISABLE") == 0) 
         {
-            _keep_running = false;
-            response = "GenericRWHardwareModel::command_callback:  STOPPING RWSIM";
-        } else {
+            _enabled = RW_SIM_ERROR;
+            response = "GenericRWHardwareModel::command_callback:  Disabled\n";
+        } 
+        else if (command.compare(0,6,"ENABLE") == 0) 
+        {
+            _enabled = RW_SIM_SUCCESS;
+            response = "GenericRWHardwareModel::command_callback:  Enabled\n";
+        }
+        else {
             response = handle_command(command);
         }
 

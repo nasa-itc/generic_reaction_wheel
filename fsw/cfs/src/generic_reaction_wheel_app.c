@@ -1,5 +1,5 @@
 /*******************************************************************************
-** File: 
+** File:
 **  generic_reaction_wheel_app.c
 **
 ** Purpose:
@@ -22,22 +22,22 @@
 */
 GENERIC_RW_AppData_t GENERIC_RW_AppData;
 
-static char deviceName0[] = "/dev/tty2";
-static char deviceName1[] = "/dev/tty3";
-static char deviceName2[] = "/dev/tty4";
-static uart_info_t RW_UART[3] = {
-    {.deviceString = &deviceName0[0], .handle = 2, .isOpen = PORT_CLOSED, .baud = 115200},
-    {.deviceString = &deviceName1[0], .handle = 3, .isOpen = PORT_CLOSED, .baud = 115200},
-    {.deviceString = &deviceName2[0], .handle = 4, .isOpen = PORT_CLOSED, .baud = 115200},
+static char        deviceName0[] = "/dev/tty2";
+static char        deviceName1[] = "/dev/tty3";
+static char        deviceName2[] = "/dev/tty4";
+static uart_info_t RW_UART[3]    = {
+       {.deviceString = &deviceName0[0], .handle = 2, .isOpen = PORT_CLOSED, .baud = 115200},
+       {.deviceString = &deviceName1[0], .handle = 3, .isOpen = PORT_CLOSED, .baud = 115200},
+       {.deviceString = &deviceName2[0], .handle = 4, .isOpen = PORT_CLOSED, .baud = 115200},
 };
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * *  * * * * **/
 /* GENERIC_RW_AppMain() -- Application entry point and main process loop      */
 /*                                                                            */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * *  * * * * **/
-void RW_AppMain( void )
+void RW_AppMain(void)
 {
-    int32  status;
+    int32 status;
 
     /*
     ** Create the first Performance Log entry
@@ -66,9 +66,8 @@ void RW_AppMain( void )
         CFE_ES_PerfLogExit(GENERIC_RW_APP_PERF_ID);
 
         /* Pend on receipt of command packet */
-        status = CFE_SB_ReceiveBuffer((CFE_SB_Buffer_t **)&GENERIC_RW_AppData.MsgPtr,
-                               GENERIC_RW_AppData.CommandPipe,
-                               CFE_SB_PEND_FOREVER);
+        status = CFE_SB_ReceiveBuffer((CFE_SB_Buffer_t **)&GENERIC_RW_AppData.MsgPtr, GENERIC_RW_AppData.CommandPipe,
+                                      CFE_SB_PEND_FOREVER);
 
         /*
         ** Performance Log Entry Stamp
@@ -81,13 +80,11 @@ void RW_AppMain( void )
         }
         else
         {
-            CFE_EVS_SendEvent(GENERIC_RW_PIPE_ERR_EID,
-                              CFE_EVS_EventType_ERROR,
+            CFE_EVS_SendEvent(GENERIC_RW_PIPE_ERR_EID, CFE_EVS_EventType_ERROR,
                               "GENERIC_RW APP: SB Pipe Read Error, App Will Exit");
 
             GENERIC_RW_AppData.RunStatus = CFE_ES_RunStatus_APP_ERROR;
         }
-
     }
 
     /*
@@ -104,16 +101,16 @@ void RW_AppMain( void )
 /* GENERIC_RW_AppInit() --  initialization                                        */
 /*                                                                            */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
-int32 GENERIC_RW_AppInit( void )
+int32 GENERIC_RW_AppInit(void)
 {
-    int32    status;
+    int32 status;
 
     GENERIC_RW_AppData.RunStatus = CFE_ES_RunStatus_APP_RUN;
 
     /*
     ** Initialize app command execution counters
     */
-    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter      = 0;
     GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter = 0;
 
     /*
@@ -129,83 +126,94 @@ int32 GENERIC_RW_AppInit( void )
     status = CFE_EVS_Register(NULL, 0, CFE_EVS_EventFilter_BINARY);
     if (status != CFE_SUCCESS)
     {
-        CFE_ES_WriteToSysLog("GENERIC_RW App: Error Registering Events, RC = 0x%08lX\n",
-                             (unsigned long)status);
-        return ( status );
+        CFE_ES_WriteToSysLog("GENERIC_RW App: Error Registering Events, RC = 0x%08lX", (unsigned long)status);
+        return (status);
     }
 
     /*
     ** Initialize housekeeping packet (clear user data area).
     */
-    CFE_MSG_Init(CFE_MSG_PTR(GENERIC_RW_AppData.HkTlm.TlmHeader),
-                   CFE_SB_ValueToMsgId(GENERIC_RW_APP_HK_TLM_MID),
-                   sizeof(GENERIC_RW_AppData.HkTlm));
+    CFE_MSG_Init(CFE_MSG_PTR(GENERIC_RW_AppData.HkTlm.TlmHeader), CFE_SB_ValueToMsgId(GENERIC_RW_APP_HK_TLM_MID),
+                 sizeof(GENERIC_RW_AppData.HkTlm));
 
     /* Connect to the UART */
     status = uart_init_port(&RW_UART[0]);
-    if(status != CFE_SUCCESS)
+    if (status != CFE_SUCCESS)
     {
-    	CFE_ES_WriteToSysLog("GENERIC_RW App: UART 0 port initialization error!\n");
-    }    
+        CFE_ES_WriteToSysLog("GENERIC_RW App: UART 0 port initialization error!");
+    }
     status = uart_init_port(&RW_UART[1]);
-    if(status != CFE_SUCCESS)
+    if (status != CFE_SUCCESS)
     {
-    	CFE_ES_WriteToSysLog("GENERIC_RW App: UART 1 port initialization error!\n");
-    }    
+        CFE_ES_WriteToSysLog("GENERIC_RW App: UART 1 port initialization error!");
+    }
     status = uart_init_port(&RW_UART[2]);
-    if(status != CFE_SUCCESS)
+    if (status != CFE_SUCCESS)
     {
-    	CFE_ES_WriteToSysLog("GENERIC_RW App: UART 2 port initialization error!\n");
-    }    
-    
+        CFE_ES_WriteToSysLog("GENERIC_RW App: UART 2 port initialization error!");
+    }
 
     /*
     ** Create Software Bus message pipe.
     */
-    status = CFE_SB_CreatePipe(&GENERIC_RW_AppData.CommandPipe,
-                               GENERIC_RW_AppData.PipeDepth,
-                               GENERIC_RW_AppData.PipeName);
+    status =
+        CFE_SB_CreatePipe(&GENERIC_RW_AppData.CommandPipe, GENERIC_RW_AppData.PipeDepth, GENERIC_RW_AppData.PipeName);
     if (status != CFE_SUCCESS)
     {
-        CFE_ES_WriteToSysLog("GENERIC_RW App: Error creating pipe, RC = 0x%08lX\n",
-                             (unsigned long)status);
-        return ( status );
+        CFE_ES_WriteToSysLog("GENERIC_RW App: Error creating pipe, RC = 0x%08lX", (unsigned long)status);
+        return (status);
     }
 
     /*
     ** Subscribe to Housekeeping request commands
     */
-    status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(GENERIC_RW_APP_SEND_HK_MID),
-                              GENERIC_RW_AppData.CommandPipe);
+    status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(GENERIC_RW_APP_SEND_HK_MID), GENERIC_RW_AppData.CommandPipe);
     if (status != CFE_SUCCESS)
     {
-        CFE_ES_WriteToSysLog("GENERIC_RW App: Error Subscribing to HK request, RC = 0x%08lX\n",
-                             (unsigned long)status);
-        return ( status );
+        CFE_ES_WriteToSysLog("GENERIC_RW App: Error Subscribing to HK request, RC = 0x%08lX", (unsigned long)status);
+        return (status);
     }
 
     /*
     ** Subscribe to ground command packets
     */
-    status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(GENERIC_RW_APP_CMD_MID),
-                              GENERIC_RW_AppData.CommandPipe);
-    if (status != CFE_SUCCESS )
+    status = CFE_SB_Subscribe(CFE_SB_ValueToMsgId(GENERIC_RW_APP_CMD_MID), GENERIC_RW_AppData.CommandPipe);
+    if (status != CFE_SUCCESS)
     {
-        CFE_ES_WriteToSysLog("GENERIC_RW App: Error Subscribing to Command, RC = 0x%08lX\n",
-                             (unsigned long)status);
+        CFE_ES_WriteToSysLog("GENERIC_RW App: Error Subscribing to Command, RC = 0x%08lX", (unsigned long)status);
 
-        return ( status );
+        return (status);
     }
 
-    CFE_EVS_SendEvent (GENERIC_RW_STARTUP_INF_EID,
-                       CFE_EVS_EventType_INFORMATION,
-                       "GENERIC_RW App Initialized. Version %d.%d.%d.%d",
-                       GENERIC_RW_APP_MAJOR_VERSION,
-                       GENERIC_RW_APP_MINOR_VERSION,
-                       GENERIC_RW_APP_REVISION,
-                       GENERIC_RW_APP_MISSION_REV);
+    /*
+    ** Always reset all counters during application initialization
+    */
+    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter       = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter  = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW0      = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW1      = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW2      = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW0 = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW1 = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW2 = 0;
 
-    return ( CFE_SUCCESS );
+    /*
+    ** Initialize RW devices to Enable(on on default)
+    */
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW0 = GENERIC_RW_DEVICE_ENABLED;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW1 = GENERIC_RW_DEVICE_ENABLED;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW2 = GENERIC_RW_DEVICE_ENABLED;
+
+    status = CFE_EVS_SendEvent(GENERIC_RW_STARTUP_INF_EID, CFE_EVS_EventType_INFORMATION,
+                               "GENERIC_RW App Initialized. Version %d.%d.%d.%d", GENERIC_RW_APP_MAJOR_VERSION,
+                               GENERIC_RW_APP_MINOR_VERSION, GENERIC_RW_APP_REVISION, GENERIC_RW_APP_MISSION_REV);
+
+    if (status != CFE_SUCCESS)
+    {
+        CFE_ES_WriteToSysLog("GENERIC_RW App:: Error sending initialization event: 0x%08X", (unsigned int)status);
+    }
+
+    return (status);
 
 } /* End of GENERIC_RW_AppInit() */
 
@@ -217,7 +225,7 @@ int32 GENERIC_RW_AppInit( void )
 /*     command pipe.                                                          */
 /*                                                                            */
 /* * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * *  * *  * * * * */
-void GENERIC_RW_ProcessCommandPacket( CFE_MSG_Message_t * Msg )
+void GENERIC_RW_ProcessCommandPacket(CFE_MSG_Message_t *Msg)
 {
     CFE_SB_MsgId_t MsgId = CFE_SB_INVALID_MSG_ID;
     CFE_MSG_GetMsgId(Msg, &MsgId);
@@ -232,10 +240,8 @@ void GENERIC_RW_ProcessCommandPacket( CFE_MSG_Message_t * Msg )
             break;
 
         default:
-            CFE_EVS_SendEvent(GENERIC_RW_INVALID_MSGID_ERR_EID,
-                              CFE_EVS_EventType_ERROR,
-                              "GENERIC_RW: invalid command packet,MID = 0x%x",
-                              CFE_SB_MsgIdToValue(MsgId));
+            CFE_EVS_SendEvent(GENERIC_RW_INVALID_MSGID_ERR_EID, CFE_EVS_EventType_ERROR,
+                              "GENERIC_RW: invalid command packet,MID = 0x%x", CFE_SB_MsgIdToValue(MsgId));
             break;
     }
 
@@ -248,7 +254,7 @@ void GENERIC_RW_ProcessCommandPacket( CFE_MSG_Message_t * Msg )
 /* GENERIC_RW_ProcessGroundCommand() -- GENERIC_RW ground commands                    */
 /*                                                                            */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
-void GENERIC_RW_ProcessGroundCommand( CFE_MSG_Message_t * Msg )
+void GENERIC_RW_ProcessGroundCommand(CFE_MSG_Message_t *Msg)
 {
     CFE_MSG_FcnCode_t CommandCode = 0;
     CFE_MSG_GetFcnCode(Msg, &CommandCode);
@@ -274,30 +280,45 @@ void GENERIC_RW_ProcessGroundCommand( CFE_MSG_Message_t * Msg )
 
             break;
 
-		/* Request Generic Reaction Wheel data 		*/
-		case GENERIC_RW_APP_REQ_DATA_CC:
+        /* Request Generic Reaction Wheel data 		*/
+        case GENERIC_RW_APP_REQ_DATA_CC:
             if (GENERIC_RW_VerifyCmdLength(Msg, sizeof(GENERIC_RW_ResetCounters_t)))
             {
-                GENERIC_RW_Current_Momentum((GENERIC_RW_Noop_t *)Msg);
+                GENERIC_RW_REQ_DATA();
             }
-            
-			break;
+
+            break;
 
         /* Set Generic Reaction Wheel torque */
         case GENERIC_RW_APP_SET_TORQUE_CC:
             if (GENERIC_RW_VerifyCmdLength(Msg, sizeof(GENERIC_RW_Cmd_t)))
             {
-                GENERIC_RW_Set_Torque((GENERIC_RW_Cmd_t *)Msg );
+                GENERIC_RW_Set_Torque((GENERIC_RW_Cmd_t *)Msg);
+            }
+
+            break;
+
+        /* Enable Generic Reaction Wheel 0-2 */
+        case GENERIC_RW_ENABLE_CC:
+            if (GENERIC_RW_VerifyCmdLength(Msg, sizeof(GENERIC_RW_Cmd_t)))
+            {
+                GENERIC_RW_Enable((GENERIC_RW_Cmd_t *)Msg);
+            }
+            break;
+        /* Disable Generic Reaction Wheel 0-2 */
+        case GENERIC_RW_DISABLE_CC:
+            if (GENERIC_RW_VerifyCmdLength(Msg, sizeof(GENERIC_RW_Cmd_t)))
+            {
+                GENERIC_RW_Disable((GENERIC_RW_Cmd_t *)Msg);
             }
 
             break;
 
         /* default case already found during FC vs length test */
         default:
-            CFE_EVS_SendEvent(GENERIC_RW_COMMAND_ERR_EID,
-                              CFE_EVS_EventType_ERROR,
-                              "Invalid ground command code: CC = %d",
-                              CommandCode);
+            GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter++;
+            CFE_EVS_SendEvent(GENERIC_RW_COMMAND_ERR_EID, CFE_EVS_EventType_ERROR,
+                              "Invalid ground command code: CC = %d", CommandCode);
             break;
     }
 
@@ -319,8 +340,8 @@ int32 GENERIC_RW_ReportHousekeeping(void)
     /*
     ** Send housekeeping telemetry packet...
     */
-    CFE_SB_TimeStampMsg((CFE_MSG_Message_t *) &GENERIC_RW_AppData.HkTlm.TlmHeader);
-    CFE_SB_TransmitMsg((CFE_MSG_Message_t *) &GENERIC_RW_AppData.HkTlm.TlmHeader, true);
+    CFE_SB_TimeStampMsg((CFE_MSG_Message_t *)&GENERIC_RW_AppData.HkTlm.TlmHeader);
+    CFE_SB_TransmitMsg((CFE_MSG_Message_t *)&GENERIC_RW_AppData.HkTlm.TlmHeader, true);
 
     return CFE_SUCCESS;
 
@@ -331,18 +352,14 @@ int32 GENERIC_RW_ReportHousekeeping(void)
 /* GENERIC_RW_Noop -- GENERIC_RW NOOP commands                                        */
 /*                                                                            */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
-int32 GENERIC_RW_Noop( const GENERIC_RW_Noop_t *Msg )
+int32 GENERIC_RW_Noop(const GENERIC_RW_Noop_t *Msg)
 {
 
     GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
 
-    CFE_EVS_SendEvent(GENERIC_RW_COMMANDNOP_INF_EID,
-                      CFE_EVS_EventType_INFORMATION,
-                      "GENERIC_RW: NOOP command  Version %d.%d.%d.%d",
-                      GENERIC_RW_APP_MAJOR_VERSION,
-                      GENERIC_RW_APP_MINOR_VERSION,
-                      GENERIC_RW_APP_REVISION,
-                      GENERIC_RW_APP_MISSION_REV);
+    CFE_EVS_SendEvent(GENERIC_RW_COMMANDNOP_INF_EID, CFE_EVS_EventType_INFORMATION,
+                      "GENERIC_RW: NOOP command  Version %d.%d.%d.%d", GENERIC_RW_APP_MAJOR_VERSION,
+                      GENERIC_RW_APP_MINOR_VERSION, GENERIC_RW_APP_REVISION, GENERIC_RW_APP_MISSION_REV);
 
     return CFE_SUCCESS;
 
@@ -356,15 +373,19 @@ int32 GENERIC_RW_Noop( const GENERIC_RW_Noop_t *Msg )
 /*         part of the task telemetry.                                        */
 /*                                                                            */
 /* * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * *  * *  * * * * */
-int32 GENERIC_RW_ResetCounters( const GENERIC_RW_ResetCounters_t *Msg )
+int32 GENERIC_RW_ResetCounters(const GENERIC_RW_ResetCounters_t *Msg)
 {
 
-    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter = 0;
-    GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter       = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter  = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW0      = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW1      = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW2      = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW0 = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW1 = 0;
+    GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW2 = 0;
 
-    CFE_EVS_SendEvent(GENERIC_RW_COMMANDRST_INF_EID,
-                      CFE_EVS_EventType_INFORMATION,
-                      "GENERIC_RW: RESET command");
+    CFE_EVS_SendEvent(GENERIC_RW_COMMANDRST_INF_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_RW: RESET command");
 
     return CFE_SUCCESS;
 
@@ -372,25 +393,29 @@ int32 GENERIC_RW_ResetCounters( const GENERIC_RW_ResetCounters_t *Msg )
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 /*                                                                            */
-/* GENERIC_RW_Noop -- GENERIC_RW Current Momentum command                         */
+/* GENERIC_RW_REQ_DATA -- GENERIC_RW_REQ_DATA command                         */
 /*                                                                            */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
-int32 GENERIC_RW_Current_Momentum( const GENERIC_RW_Noop_t *Msg )
+int32 GENERIC_RW_REQ_DATA(void)
 {
     int32_t status;
-    double momentum;
+    double  momentum;
 
-    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
-    CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_EventType_DEBUG,"Request Generic Reaction Wheel Data");
+    CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_EventType_DEBUG, "Request Generic Reaction Wheel Data");
 
     /* Read data from the UARTs for all 3 wheels */
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++)
+    {
         status = GetCurrentMomentum(&RW_UART[i], &momentum);
-        //OS_printf("GENERIC_RW: GetCurrentMomentum:  status=%d, momentum=%f\n", status, momentum);
-        if (status > 0) {
+        // OS_printf("GENERIC_RW: GetCurrentMomentum:  status=%d, momentum=%f", status, momentum);
+        if (status > 0)
+        {
             GENERIC_RW_AppData.HkTlm.Payload.data.momentum[i] = momentum;
-        } else {
-            CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_EventType_ERROR,"Request Generic Reaction Wheel Data - Error reading momentum. Status: %d", status);
+        }
+        else
+        {
+            CFE_EVS_SendEvent(GENERIC_RW_CMD_REQ_DATA_EID, CFE_EVS_EventType_ERROR,
+                              "Request Generic Reaction Wheel Data - Error reading momentum. Status: %d", status);
         }
     }
 
@@ -398,24 +423,24 @@ int32 GENERIC_RW_Current_Momentum( const GENERIC_RW_Noop_t *Msg )
     GENERIC_RW_ReportHousekeeping();
 
     return CFE_SUCCESS;
-} /* End of GENERIC_RW_Current_Momentum */
+} /* End of GENERIC_RW_REQ_DATA */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 /*                                                                            */
 /* GENERIC_RW_Noop -- GENERIC_RW Set Torque command                         */
 /*                                                                            */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
-int32_t GENERIC_RW_Set_Torque( const GENERIC_RW_Cmd_t *Msg )
+int32_t GENERIC_RW_Set_Torque(const GENERIC_RW_Cmd_t *Msg)
 {
     int32_t status;
-    double torque;
+    double  torque;
     uint8_t wheel_num;
 
-    GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
     GENERIC_RW_Cmd_t *cmd;
-    cmd = (GENERIC_RW_Cmd_t*)Msg;
-    CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_EventType_DEBUG, 
-                    "Generic Reaction Wheel %d: Info, Set Torque Command received (%d * 10^-4 N-m)", cmd->wheel_number, cmd->data);
+    cmd = (GENERIC_RW_Cmd_t *)Msg;
+    CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_EventType_DEBUG,
+                      "Generic Reaction Wheel %d: Info, Set Torque Command received (%d * 10^-4 N-m)",
+                      cmd->wheel_number, cmd->data);
     torque = cmd->data;
     torque /= 10000.0; // units are 10^-4 Newton-meters (so we don't have to send floats in the command)
 
@@ -425,7 +450,44 @@ int32_t GENERIC_RW_Set_Torque( const GENERIC_RW_Cmd_t *Msg )
 
     if (status < 0)
     {
-        CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_EventType_ERROR, "Generic Reaction Wheel: Error writing to UART=%d\n", status);
+        if (wheel_num == 0)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW0++;
+        }
+        else if (wheel_num == 1)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW1++;
+        }
+        else if (wheel_num == 2)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW2++;
+        }
+
+        GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter++;
+        CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_EventType_ERROR,
+                          "Generic Reaction Wheel: Error writing to UART status = %d", status);
+    }
+    else
+    {
+        if (wheel_num == 0)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW0++;
+        }
+        else if (wheel_num == 1)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW1++;
+        }
+        else if (wheel_num == 2)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW2++;
+        }
+        else
+        {
+            CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_EventType_ERROR,
+                              "Generic Reaction Wheel: Invalid Wheel number, unable to set torque.");
+        }
+
+        GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
     }
 
     return status;
@@ -436,12 +498,12 @@ int32_t GENERIC_RW_Set_Torque( const GENERIC_RW_Cmd_t *Msg )
 /* GENERIC_RW_VerifyCmdLength() -- Verify command packet length                   */
 /*                                                                            */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
-bool GENERIC_RW_VerifyCmdLength( CFE_MSG_Message_t * Msg, uint16 ExpectedLength )
+bool GENERIC_RW_VerifyCmdLength(CFE_MSG_Message_t *Msg, uint16 ExpectedLength)
 {
-    bool result = true;
-    CFE_SB_MsgId_t MessageID = CFE_SB_INVALID_MSG_ID;
-    CFE_MSG_FcnCode_t CommandCode = 0;
-    size_t ActualLength = 0;
+    bool              result       = true;
+    CFE_SB_MsgId_t    MessageID    = CFE_SB_INVALID_MSG_ID;
+    CFE_MSG_FcnCode_t CommandCode  = 0;
+    size_t            ActualLength = 0;
 
     CFE_MSG_GetSize(Msg, &ActualLength);
 
@@ -453,17 +515,194 @@ bool GENERIC_RW_VerifyCmdLength( CFE_MSG_Message_t * Msg, uint16 ExpectedLength 
         CFE_MSG_GetMsgId(Msg, &MessageID);
         CFE_MSG_GetFcnCode(Msg, &CommandCode);
 
-        CFE_EVS_SendEvent(GENERIC_RW_LEN_ERR_EID,
-                          CFE_EVS_EventType_ERROR,
+        CFE_EVS_SendEvent(GENERIC_RW_LEN_ERR_EID, CFE_EVS_EventType_ERROR,
                           "Invalid Msg length: ID = 0x%X,  CC = %d, Len = %ld, Expected = %d",
-                          CFE_SB_MsgIdToValue(MessageID),
-                          CommandCode,
-                          ActualLength,
-                          ExpectedLength);
+                          CFE_SB_MsgIdToValue(MessageID), CommandCode, ActualLength, ExpectedLength);
 
         result = false;
 
         GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter++;
     }
-    return( result );
+    return (result);
 } /* End of GENERIC_RW_VerifyCmdLength() */
+
+/*
+** Enable Component Command
+*/
+void GENERIC_RW_Enable(const GENERIC_RW_Cmd_t *Msg)
+{
+    int32   status = OS_SUCCESS;
+    uint8_t wheel_num;
+
+    GENERIC_RW_Cmd_t *cmd;
+    cmd = (GENERIC_RW_Cmd_t *)Msg;
+
+    wheel_num = cmd->wheel_number;
+
+    CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_EventType_DEBUG,
+                      "Generic Reaction Wheel %d: Enable Device Command Received ", wheel_num);
+
+    /* Check that device is Disabled */
+    if (wheel_num == 0 && GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW0 == GENERIC_RW_DEVICE_DISABLED)
+    {
+        /* Increment command success counter */
+        GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
+
+        /* initialize device specific protocols */
+        status = uart_init_port(&RW_UART[wheel_num]);
+        if (status == OS_SUCCESS)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW0++;
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW0 = GENERIC_RW_DEVICE_ENABLED;
+
+            CFE_EVS_SendEvent(GENERIC_RW0_ENABLE_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_RW: RW0 Device enabled");
+        }
+        else
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW0++;
+            CFE_EVS_SendEvent(GENERIC_RW_ENABLE_ERR_EID, CFE_EVS_EventType_ERROR, "GENERIC_RW: device enable error %d",
+                              status);
+        }
+    }
+    else if (wheel_num == 1 && GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW1 == GENERIC_RW_DEVICE_DISABLED)
+    {
+        /* Increment command success counter */
+        GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
+
+        /* initialize device specific protocols */
+        status = uart_init_port(&RW_UART[wheel_num]);
+        if (status == OS_SUCCESS)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW1++;
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW1 = GENERIC_RW_DEVICE_ENABLED;
+
+            CFE_EVS_SendEvent(GENERIC_RW0_ENABLE_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_RW: RW1 Device enabled");
+        }
+        else
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW1++;
+            CFE_EVS_SendEvent(GENERIC_RW_ENABLE_ERR_EID, CFE_EVS_EventType_ERROR, "GENERIC_RW: device enable error %d",
+                              status);
+        }
+    }
+    else if (wheel_num == 2 && GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW2 == GENERIC_RW_DEVICE_DISABLED)
+    {
+        /* Increment command success counter */
+        GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
+
+        /* initialize device specific protocols */
+        status = uart_init_port(&RW_UART[wheel_num]);
+        if (status == OS_SUCCESS)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW2++;
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW2 = GENERIC_RW_DEVICE_ENABLED;
+
+            CFE_EVS_SendEvent(GENERIC_RW0_ENABLE_EID, CFE_EVS_EventType_INFORMATION, "GENERIC_RW: RW2 Device enabled");
+        }
+        else
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW2++;
+            CFE_EVS_SendEvent(GENERIC_RW_ENABLE_ERR_EID, CFE_EVS_EventType_ERROR, "GENERIC_RW: device enable error %d",
+                              status);
+        }
+    }
+    else
+    {
+        GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter++;
+        CFE_EVS_SendEvent(GENERIC_RW_ENABLE_ERR_EID, CFE_EVS_EventType_ERROR,
+                          "GENERIC_RW: Device Enabled failed, already enabled");
+    }
+}
+
+/*
+** Disable Component Command
+*/
+void GENERIC_RW_Disable(const GENERIC_RW_Cmd_t *Msg)
+{
+    int32   status = OS_SUCCESS;
+    uint8_t wheel_num;
+
+    GENERIC_RW_Cmd_t *cmd;
+    cmd = (GENERIC_RW_Cmd_t *)Msg;
+
+    wheel_num = cmd->wheel_number;
+
+    CFE_EVS_SendEvent(GENERIC_RW_CMD_SET_TORQUE_EID, CFE_EVS_EventType_DEBUG,
+                      "Generic Reaction Wheel %d: Disable Device Command Received ", wheel_num);
+
+    /* Check that device is enabled */
+    if (wheel_num == 0 && GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW0 == GENERIC_RW_DEVICE_ENABLED)
+    {
+        /* Increment command success counter */
+        GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
+
+        /* Close device specific protocols */
+        status = uart_close_port(&RW_UART[wheel_num]);
+        if (status == OS_SUCCESS)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW0++;
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW0 = GENERIC_RW_DEVICE_DISABLED;
+
+            CFE_EVS_SendEvent(GENERIC_RW0_DISABLE_EID, CFE_EVS_EventType_INFORMATION,
+                              "GENERIC_RW: RW0 Device disabled");
+        }
+        else
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW0++;
+            CFE_EVS_SendEvent(GENERIC_RW_CLOSE_ERR_EID, CFE_EVS_EventType_ERROR, "GENERIC_RW: device close error %d",
+                              status);
+        }
+    }
+    else if (wheel_num == 1 && GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW1 == GENERIC_RW_DEVICE_ENABLED)
+    {
+        /* Increment command success counter */
+        GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
+
+        /* Close device specific protocols */
+        status = uart_close_port(&RW_UART[wheel_num]);
+        if (status == OS_SUCCESS)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW1++;
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW1 = GENERIC_RW_DEVICE_DISABLED;
+
+            CFE_EVS_SendEvent(GENERIC_RW1_DISABLE_EID, CFE_EVS_EventType_INFORMATION,
+                              "GENERIC_RW: RW1 Device disabled");
+        }
+        else
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW1++;
+            CFE_EVS_SendEvent(GENERIC_RW_CLOSE_ERR_EID, CFE_EVS_EventType_ERROR, "GENERIC_RW: device close error %d",
+                              status);
+        }
+    }
+    else if (wheel_num == 2 && GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW2 == GENERIC_RW_DEVICE_ENABLED)
+    {
+        /* Increment command success counter */
+        GENERIC_RW_AppData.HkTlm.Payload.CommandCounter++;
+
+        /* Close device specific protocols */
+        status = uart_close_port(&RW_UART[wheel_num]);
+        if (status == OS_SUCCESS)
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceCount_RW2++;
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceEnabled_RW2 = GENERIC_RW_DEVICE_DISABLED;
+
+            CFE_EVS_SendEvent(GENERIC_RW2_DISABLE_EID, CFE_EVS_EventType_INFORMATION,
+                              "GENERIC_RW: RW2 Device disabled");
+        }
+        else
+        {
+            GENERIC_RW_AppData.HkTlm.Payload.DeviceErrorCount_RW2++;
+            CFE_EVS_SendEvent(GENERIC_RW_CLOSE_ERR_EID, CFE_EVS_EventType_ERROR, "GENERIC_RW: device close error %d",
+                              status);
+        }
+    }
+    else
+    {
+
+        GENERIC_RW_AppData.HkTlm.Payload.CommandErrorCounter++;
+        CFE_EVS_SendEvent(GENERIC_RW_DISABLE_ERR_EID, CFE_EVS_EventType_ERROR,
+                          "GENERIC_RW: Device disable failed, already disabled");
+    }
+    return;
+}

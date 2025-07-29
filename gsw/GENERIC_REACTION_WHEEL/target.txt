@@ -1,6 +1,11 @@
 # Ignored Parameters
 # IGNORE_PARAMETER parameter_name
 
+#
+# Required Libraries
+#
+#REQUIRE 'mission_lib.rb'
+
 # CCSDS 
 IGNORE_PARAMETER CCSDS_STREAMID
 IGNORE_PARAMETER CCSDS_SEQUENCE
