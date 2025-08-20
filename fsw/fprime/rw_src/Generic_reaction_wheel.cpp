@@ -43,10 +43,10 @@ namespace Components {
     	OS_printf("GENERIC_RW Checkout: UART 2 port initialization error!\n");
     } 
 
-    for ( int i = 0; i < RW_NUM; i++ )
-    {
-        uart_close_port(&RW_UART[i]);
-    }
+    // for ( int i = 0; i < RW_NUM; i++ )
+    // {
+    //     uart_close_port(&RW_UART[i]);
+    // }
 
     HkTelemetryPkt.CommandCount = 0;
     HkTelemetryPkt.CommandErrorCount = 0;
@@ -54,7 +54,7 @@ namespace Components {
     for(int i = 0; i < RW_NUM; i++){
       HkTelemetryPkt.DeviceCount[i] = 0;
       HkTelemetryPkt.DeviceErrorCount[i] = 0;
-      HkTelemetryPkt.DeviceEnabled[i] = GENERIC_RW_DEVICE_DISABLED;
+      HkTelemetryPkt.DeviceEnabled[i] = GENERIC_RW_DEVICE_ENABLED;
     }
   }
 
@@ -268,6 +268,61 @@ namespace Components {
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
   }
 
+  void Generic_reaction_wheel :: updateData_handler(const NATIVE_INT_TYPE portNum, NATIVE_UINT_TYPE context)
+  {
+    int32_t status = OS_SUCCESS;
+    for(int i = 0; i < 3; i++){
+      status = GetCurrentMomentum(&RW_UART[i], &HkTelemetryPkt.momentum[i]);
+
+      if(status < 0)
+      {
+        HkTelemetryPkt.DeviceErrorCount[i]++;
+      }
+      else
+      {
+        HkTelemetryPkt.DeviceCount[i]++;
+      }
+    }
+
+    this->RWout_out(0, HkTelemetryPkt.momentum[0], HkTelemetryPkt.momentum[1], HkTelemetryPkt.momentum[2]);
+  }
+
+  void Generic_reaction_wheel :: updateTlm_handler(const NATIVE_INT_TYPE portNum, NATIVE_UINT_TYPE context)
+  {
+    this->tlmWrite_CommandCount(HkTelemetryPkt.CommandCount);
+    this->tlmWrite_CommandErrorCount(HkTelemetryPkt.CommandErrorCount);
+    this->tlmWrite_DeviceCountRW0(HkTelemetryPkt.DeviceCount[0]);
+    this->tlmWrite_DeviceErrorCountRW0(HkTelemetryPkt.DeviceErrorCount[0]);
+    this->tlmWrite_DeviceCountRW1(HkTelemetryPkt.DeviceCount[1]);
+    this->tlmWrite_DeviceErrorCountRW1(HkTelemetryPkt.DeviceErrorCount[1]);
+    this->tlmWrite_DeviceCountRW2(HkTelemetryPkt.DeviceCount[2]);
+    this->tlmWrite_DeviceErrorCountRW2(HkTelemetryPkt.DeviceErrorCount[2]);
+    this->tlmWrite_RW0_Data(HkTelemetryPkt.momentum[0]);
+    this->tlmWrite_RW1_Data(HkTelemetryPkt.momentum[1]);
+    this->tlmWrite_RW2_Data(HkTelemetryPkt.momentum[2]);
+  }
+
+  void Generic_reaction_wheel :: RWin_handler( NATIVE_INT_TYPE portNum, F64 Torque0, F64 Torque1, F64 Torque2)
+  {
+    double torques[3] = {Torque0, Torque1, Torque2};
+
+    int32_t status = OS_SUCCESS;
+
+    for(int i = 0; i < 3; i++)
+    {
+      status = SetRWTorque(&RW_UART[i], torques[i]);
+
+      if(status < 0)
+      {
+        HkTelemetryPkt.DeviceErrorCount[i]++;
+      }
+      else
+      {
+        HkTelemetryPkt.DeviceCount[i]++;
+      }
+    }
+  }
+
   // GENERIC_REACTION_WHEEL_Set_Torque
   void Generic_reaction_wheel :: SET_TORQUE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, const Generic_reaction_wheel_wheelNums wheel_num, const F64 torque) 
   {
@@ -293,7 +348,6 @@ namespace Components {
         this->log_ACTIVITY_HI_TELEM(configMsg); 
         HkTelemetryPkt.DeviceCount[wheel_num.e]++;
         HkTelemetryPkt.CommandCount++;
-        HkTelemetryPkt.momentum[wheel_num.e] = scaledTorque;
       }    
       
     }
