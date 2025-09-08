@@ -70,17 +70,17 @@ namespace Nos3
                 }
             }
         }
-        _uart_connection.reset(new NosEngine::Uart::Uart(_hub, config.get("simulator.name", "generic-rw-sim"), connection_string,
-            bus_name));
-        _uart_connection->open(node_port);
-        _uart_connection->set_read_callback(
-            std::bind(&GenericRWHardwareModel::uart_read_callback, this, std::placeholders::_1, std::placeholders::_2));
-
         // Here's how to get a data provider
         std::string dp_name = config.get("simulator.hardware-model.data-provider.type", "GENERICRWSIMDATA42SOCKETPROVIDER");
         _sdp = SimDataProviderFactory::Instance().Create(dp_name, config);
 
         _wheel_number = config.get("simulator.hardware-model.data-provider.reactionwheel", 0);
+
+        _uart_connection.reset(new NosEngine::Uart::Uart(_hub, config.get("simulator.name", "generic-rw-sim"), connection_string,
+            bus_name));
+        _uart_connection->open(node_port);
+        _uart_connection->set_read_callback(
+            std::bind(&GenericRWHardwareModel::uart_read_callback, this, std::placeholders::_1, std::placeholders::_2));
 
         //_prev_data_sent_time = _absolute_start_time + 10.0;
         //_time_bus->add_time_tick_callback(std::bind(&GenericRWHardwareModel::send_periodic_data, this, std::placeholders::_1));

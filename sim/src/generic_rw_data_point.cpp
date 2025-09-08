@@ -37,6 +37,11 @@ namespace Nos3
         _momentum = 0;
     }
 
+    GenericRWDataPoint::GenericRWDataPoint(int16_t spacecraft, int16_t wheel, double momentum) :
+        _sc(spacecraft), _reactionwheel(wheel), _momentum(momentum)
+    {
+    }
+
     void GenericRWDataPoint::do_parsing(void) const  
     { 
         try {

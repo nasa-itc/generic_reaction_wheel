@@ -30,6 +30,7 @@ namespace Nos3
     public:
         //GPSSimDataPoint(void) : _not_parsed(false) /* nothing to parse */ {};
         GenericRWDataPoint(int16_t spacecraft, int16_t wheel, const boost::shared_ptr<Sim42DataPoint> dp);
+        GenericRWDataPoint(int16_t spacecraft, int16_t wheel, double momentum);
         ~GenericRWDataPoint(void);
         std::string to_string(void) const;
 
