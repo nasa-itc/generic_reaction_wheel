@@ -174,7 +174,7 @@ namespace Nos3
             ss << "SC[0].Whl[" << _wheel_number << "].Tcmd = ";
             ss << torque;
 
-            dynamic_cast<GenericRWData42SocketProvider*>(_sdp)->send_command_to_socket(ss.str());
+            dynamic_cast<SimData42SocketProvider*>(_sdp)->send_command_to_socket(ss.str());
             response = "SET_TORQUE=" + ss.str();
         } else if (command.substr(0,16).compare("CURRENT_MOMENTUM") == 0)
         {
