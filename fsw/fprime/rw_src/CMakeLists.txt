@@ -17,8 +17,8 @@ set(SOURCE_FILES
   "${CMAKE_CURRENT_LIST_DIR}/Generic_reaction_wheel.fpp"
   "${CMAKE_CURRENT_LIST_DIR}/Generic_reaction_wheel.cpp"
 
-  "${CMAKE_CURRENT_LIST_DIR}/../../shared/generic_reaction_wheel_device.c"
-  "${CMAKE_CURRENT_LIST_DIR}/../../../../../fsw/apps/hwlib/sim/src/nos_link.c"
+  # "${CMAKE_CURRENT_LIST_DIR}/../../shared/generic_reaction_wheel_device.c"
+  # "${CMAKE_CURRENT_LIST_DIR}/../../../../../fsw/apps/hwlib/sim/src/nos_link.c"
   )
 
 # Uncomment and add any modules that this component depends on, else
@@ -28,8 +28,14 @@ set(SOURCE_FILES
 #     Add your dependencies here
 # )
 set(MOD_DEPS
+    Fw_Types
     ${ITC_Common_LIBRARIES}
     ${NOSENGINE_LIBRARIES}
 )
 
 register_fprime_module()
+
+target_sources(${FPRIME_CURRENT_MODULE} PRIVATE 
+  "${CMAKE_CURRENT_LIST_DIR}/../../shared/generic_reaction_wheel_device.c"
+  "${CMAKE_CURRENT_LIST_DIR}/../../../../../fsw/apps/hwlib/sim/src/nos_link.c"
+)

@@ -62,7 +62,7 @@ namespace Components {
       //! Destroy Generic_reaction_wheel object
       ~Generic_reaction_wheel();
 
-    PRIVATE:
+    private:
 
       // ----------------------------------------------------------------------
       // Handler implementations for commands

@@ -8,7 +8,8 @@
 ** Include Files
 */
 #include "rw_src/Generic_reaction_wheel.hpp"
-#include "FpConfig.hpp"
+// #include "FpConfig.hpp"
+#include "Fw/FPrimeBasicTypes.hpp"
 #include <Fw/Log/LogString.hpp>
 
 
