@@ -280,7 +280,7 @@ namespace Components {
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
   }
 
-  void Generic_reaction_wheel :: updateData_handler(const NATIVE_INT_TYPE portNum, NATIVE_UINT_TYPE context)
+  void Generic_reaction_wheel :: updateData_handler(const FwIndexType portNum, U32 context)
   {
     int32_t status = OS_SUCCESS;
     for(int i = 0; i < 3; i++){
@@ -299,7 +299,7 @@ namespace Components {
     this->RWout_out(0, HkTelemetryPkt.momentum[0], HkTelemetryPkt.momentum[1], HkTelemetryPkt.momentum[2]);
   }
 
-  void Generic_reaction_wheel :: updateTlm_handler(const NATIVE_INT_TYPE portNum, NATIVE_UINT_TYPE context)
+  void Generic_reaction_wheel :: updateTlm_handler(const FwIndexType portNum, U32 context)
   {
     this->tlmWrite_CommandCount(HkTelemetryPkt.CommandCount);
     this->tlmWrite_CommandErrorCount(HkTelemetryPkt.CommandErrorCount);
@@ -314,7 +314,7 @@ namespace Components {
     this->tlmWrite_RW2_Data(HkTelemetryPkt.momentum[2]);
   }
 
-  void Generic_reaction_wheel :: RWin_handler( NATIVE_INT_TYPE portNum, F64 Torque0, F64 Torque1, F64 Torque2)
+  void Generic_reaction_wheel :: RWin_handler( FwIndexType portNum, F64 Torque0, F64 Torque1, F64 Torque2)
   {
     double torques[3] = {Torque0, Torque1, Torque2};
 
