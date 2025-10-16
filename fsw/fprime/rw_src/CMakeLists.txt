@@ -7,11 +7,11 @@
 #
 ####
 #ITC Changes
-include_directories("../../shared/") #device.h
-include_directories("../../standalone/") #device_cfg.h
-include_directories("../../../../../fsw/apps/hwlib/fsw/public_inc")
-include_directories("../platform_inc") #platform_cfg.h
-include_directories("../../../../../fsw/apps/hwlib/sim/inc")
+# include_directories("../../shared/") #device.h
+# include_directories("../../standalone/") #device_cfg.h
+# include_directories("../../../../../fsw/apps/hwlib/fsw/public_inc")
+# include_directories("../platform_inc") #platform_cfg.h
+# include_directories("../../../../../fsw/apps/hwlib/sim/inc")
 
 set(SOURCE_FILES
   "${CMAKE_CURRENT_LIST_DIR}/Generic_reaction_wheel.fpp"
@@ -38,4 +38,12 @@ register_fprime_module()
 target_sources(${FPRIME_CURRENT_MODULE} PRIVATE 
   "${CMAKE_CURRENT_LIST_DIR}/../../shared/generic_reaction_wheel_device.c"
   "${CMAKE_CURRENT_LIST_DIR}/../../../../../fsw/apps/hwlib/sim/src/nos_link.c"
+)
+
+target_include_directories(${FPRIME_CURRENT_MODULE} PUBLIC
+  "../../shared"
+  "../../standalone/"
+  "../../../../../fsw/apps/hwlib/fsw/public_inc"
+  "../platform_inc"
+  "../../../../../fsw/apps/hwlib/sim/inc"
 )
