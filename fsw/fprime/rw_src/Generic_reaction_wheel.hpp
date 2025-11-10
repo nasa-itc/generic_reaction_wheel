@@ -62,7 +62,7 @@ namespace Components {
       //! Destroy Generic_reaction_wheel object
       ~Generic_reaction_wheel();
 
-    PRIVATE:
+    private:
 
       // ----------------------------------------------------------------------
       // Handler implementations for commands
@@ -103,17 +103,17 @@ namespace Components {
       ) override;
 
       void updateData_handler(
-        const NATIVE_INT_TYPE portNum, //!< The port number
-        NATIVE_UINT_TYPE context //!< The call order
+        const FwIndexType portNum, //!< The port number
+        U32 context //!< The call order
       ) override;
 
       void updateTlm_handler(
-        const NATIVE_INT_TYPE portNum, //!< The port number
-        NATIVE_UINT_TYPE context //!< The call order
+        const FwIndexType portNum, //!< The port number
+        U32 context //!< The call order
       ) override;
 
       void RWin_handler(
-        NATIVE_INT_TYPE portNum,
+        FwIndexType portNum,
         F64 Torque0,
         F64 Torque1,
         F64 Torque2
