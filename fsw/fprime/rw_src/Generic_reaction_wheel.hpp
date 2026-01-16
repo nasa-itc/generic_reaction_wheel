@@ -62,7 +62,7 @@ namespace Components {
       //! Destroy Generic_reaction_wheel object
       ~Generic_reaction_wheel();
 
-    PRIVATE:
+    private:
 
       // ----------------------------------------------------------------------
       // Handler implementations for commands
@@ -102,6 +102,23 @@ namespace Components {
         const F64 torque //!< Torque to set reaction wheel to
       ) override;
 
+      void updateData_handler(
+        const FwIndexType portNum, //!< The port number
+        U32 context //!< The call order
+      ) override;
+
+      void updateTlm_handler(
+        const FwIndexType portNum, //!< The port number
+        U32 context //!< The call order
+      ) override;
+
+      void RWin_handler(
+        FwIndexType portNum,
+        F64 Torque0,
+        F64 Torque1,
+        F64 Torque2
+      ) override;
+      
       inline Generic_reaction_wheel_ActiveState get_active_state(uint8_t DeviceEnabled);
 
   };

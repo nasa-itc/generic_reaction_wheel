@@ -2,6 +2,18 @@ module Components {
     @ reaction wheel device control and monitoring
     active component Generic_reaction_wheel {
 
+        @ RW output port
+        output port RWout: RWDataPort
+
+        @ Periodic Data RW
+        async input port updateData: Svc.Sched
+
+        @ Periodic Tlm RW
+        async input port updateTlm: Svc.Sched
+
+        @ RW input port
+        async input port RWin: RWOUTDataPort
+        
         @ Component Enable State
         enum ActiveState {
             DISABLED @< DISABLED
