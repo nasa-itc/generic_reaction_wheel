@@ -5,7 +5,7 @@
 #include <ItcLogger/Logger.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <generic_rw_data_point.hpp>
-#include <sim_data_42socket_provider.hpp>
+#include <generic_rw_42cmd_data_provider.hpp>
 #include <blackboard_data.hpp>
 
 namespace Nos3
@@ -13,7 +13,7 @@ namespace Nos3
     namespace bip = boost::interprocess;
 
     /* Standard for a 42 data provider */
-    class GenericRWShmemDataProvider : public SimData42SocketProvider
+    class GenericRWShmemDataProvider : public GenericRW42CmdDataProvider
     {
     public:
         /* Constructors */
@@ -27,7 +27,6 @@ namespace Nos3
         ~GenericRWShmemDataProvider(void) {};
         GenericRWShmemDataProvider& operator=(const GenericRWShmemDataProvider&) {return *this;};
 
-        int16_t _sc;  /* Which spacecraft number to parse out of 42 data */
         int16_t _reactionwheel;
 
         bip::mapped_region _shm_region;

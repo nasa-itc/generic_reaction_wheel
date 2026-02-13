@@ -6,7 +6,7 @@ namespace Nos3
 
     extern ItcLogger::Logger *sim_logger;
 
-    GenericRWShmemDataProvider::GenericRWShmemDataProvider(const boost::property_tree::ptree& config) : SimData42SocketProvider(config)
+    GenericRWShmemDataProvider::GenericRWShmemDataProvider(const boost::property_tree::ptree& config) : GenericRW42CmdDataProvider(config)
     {
         sim_logger->trace("GenericRWShmemDataProvider::GenericRWShmemDataProvider:  Constructor executed");
         const std::string shm_name = config.get("simulator.hardware-model.data-provider.shared-memory-name", "Blackboard");
@@ -16,7 +16,6 @@ namespace Nos3
         bip::mapped_region shm_region(shm, bip::read_write);
         _shm_region = std::move(shm_region); // don't let this go out of scope/get destroyed
         _blackboard_data = static_cast<BlackboardData*>(_shm_region.get_address());
-        _sc = config.get("simulator.hardware-model.data-provider.spacecraft", 0);
         _reactionwheel = config.get("simulator.hardware-model.data-provider.reactionwheel", 0);
     }
 
