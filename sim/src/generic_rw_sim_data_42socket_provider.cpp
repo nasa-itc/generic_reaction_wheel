@@ -28,7 +28,7 @@ namespace Nos3
 
     extern ItcLogger::Logger *sim_logger;
 
-    GenericRWData42SocketProvider::GenericRWData42SocketProvider(const boost::property_tree::ptree& config) : SimData42SocketProvider(config)
+    GenericRWData42SocketProvider::GenericRWData42SocketProvider(const boost::property_tree::ptree& config) : GenericRW42CmdDataProvider(config)
     {
         sim_logger->trace("GenericRWData42SocketProvider::GenericRWData42SocketProvider:  Constructor executed");
 
@@ -39,7 +39,6 @@ namespace Nos3
 
         connect_reader_thread_as_42_socket_client(config.get("simulator.hardware-model.data-provider.hostname", "localhost"),
             config.get("simulator.hardware-model.data-provider.port", 4242));
-        _sc = config.get("simulator.hardware-model.data-provider.spacecraft", 0);
         _reactionwheel = config.get("simulator.hardware-model.data-provider.reactionwheel", 0);
 
         sim_logger->trace("GenericRWData42SocketProvider::GenericRWData42SocketProvider:  Constructor exiting");
