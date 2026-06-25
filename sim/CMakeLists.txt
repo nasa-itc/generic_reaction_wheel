@@ -10,9 +10,10 @@ include_directories(inc
 
 set(generic_rw_sim_src
     src/generic_rw_hardware_model.cpp
+    src/generic_rw_42cmd_data_provider.cpp
     src/generic_rw_sim_data_42socket_provider.cpp
-    src/generic_rw_data_point.cpp
     src/generic_rw_shmem_data_provider.cpp
+    src/generic_rw_data_point.cpp
 )
 
 # For Code::Blocks and other IDEs

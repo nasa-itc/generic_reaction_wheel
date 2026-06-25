@@ -18,11 +18,11 @@
 #ifndef GENERICRW42DATAPROVIDER_HPP
 #define GENERICRW42DATAPROVIDER_HPP
 
-#include <sim_data_42socket_provider.hpp>
+#include <generic_rw_42cmd_data_provider.hpp>
 
 namespace Nos3
 {
-    class GenericRWData42SocketProvider : public SimData42SocketProvider
+    class GenericRWData42SocketProvider : public GenericRW42CmdDataProvider
     {
     public:
         GenericRWData42SocketProvider(const boost::property_tree::ptree& config);
@@ -31,7 +31,6 @@ namespace Nos3
     private:
         // Private helper methods
         // Private data
-        int16_t _sc;  // Which spacecraft number to parse out of 42 data
         int16_t _reactionwheel; // Which reaction wheel number to parse out of 42 data
     };
 }

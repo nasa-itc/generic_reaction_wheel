@@ -170,12 +170,11 @@ namespace Nos3
             catch (...) {
                 sim_logger->error("Invalid torque command value");
             }
-            std::stringstream ss;
-            ss << "SC[0].Whl[" << _wheel_number << "].Tcmd = ";
-            ss << torque;
+            dynamic_cast<GenericRW42CmdDataProvider*>(_sdp)->cmd_torque(_wheel_number, torque);
 
-            dynamic_cast<SimData42SocketProvider*>(_sdp)->send_command_to_socket(ss.str());
-            response = "SET_TORQUE=" + ss.str();
+            std::stringstream ss;
+            ss << "SET_TORQUE=" << torque;
+            response = ss.str();
         } else if (command.substr(0,16).compare("CURRENT_MOMENTUM") == 0)
         {
             const boost::shared_ptr<GenericRWDataPoint> data_point =
