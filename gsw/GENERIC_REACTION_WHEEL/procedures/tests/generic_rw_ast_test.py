@@ -14,7 +14,7 @@ except ImportError:
     pass
 
 
-def run_generic_reaction_wheel_ast_test():
+def run_generic_rw_ast_test():
     ##
     ## Hardware failure
     ##

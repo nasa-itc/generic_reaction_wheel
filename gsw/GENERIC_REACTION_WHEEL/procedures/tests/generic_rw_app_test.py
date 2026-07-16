@@ -13,7 +13,7 @@ except ImportError:
     pass
 
 
-def run_generic_reaction_wheel_app_test():
+def run_generic_rw_app_test():
 
     ##
     # get tlm packet for Reaction wheel

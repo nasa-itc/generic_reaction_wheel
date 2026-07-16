@@ -13,7 +13,7 @@ except ImportError:
     pass
 
 
-def run_generic_reaction_wheel_device_test():
+def run_generic_rw_device_test():
     ##
     ## This script tests the cFS component device functionality.
     ## Currently this includes: 
