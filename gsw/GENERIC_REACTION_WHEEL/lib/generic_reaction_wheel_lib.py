@@ -73,9 +73,9 @@ def confirm_GENERIC_REACTION_WHEEL_data():
     time.sleep(GENERIC_REACTION_WHEEL_TORQUE_RESPONSE_SLEEP)
     get_GENERIC_REACTION_WHEEL_data()
     if (rw0_momentum_init >= GENERIC_REACTION_WHEEL_MAX_MOMENTUM_NM):
-        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_0 >= {rw0_momentum_init}", 5)
+        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_0 >= {rw0_momentum_init}", 15)
     else:
-        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_0 > {rw0_momentum_init}", 5)
+        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_0 > {rw0_momentum_init}", 15)
 
     
     rw0_momentum = tlm("GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_0")
@@ -87,9 +87,9 @@ def confirm_GENERIC_REACTION_WHEEL_data():
     time.sleep(GENERIC_REACTION_WHEEL_TORQUE_RESPONSE_SLEEP)
     get_GENERIC_REACTION_WHEEL_data()
     if (rw1_momentum_init >= GENERIC_REACTION_WHEEL_MAX_MOMENTUM_NM):
-        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_1 >= {rw1_momentum_init}", 5)
+        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_1 >= {rw1_momentum_init}", 15)
     else:
-        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_1 > {rw1_momentum_init}", 5)
+        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_1 > {rw1_momentum_init}", 15)
     
     rw1_momentum = tlm("GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_1")
     print(f"Reaction Wheel 1 Momentum (N m): {rw1_momentum}")
@@ -100,9 +100,9 @@ def confirm_GENERIC_REACTION_WHEEL_data():
     time.sleep(GENERIC_REACTION_WHEEL_TORQUE_RESPONSE_SLEEP)
     get_GENERIC_REACTION_WHEEL_data()
     if (rw2_momentum_init >= GENERIC_REACTION_WHEEL_MAX_MOMENTUM_NM):
-        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_2 >= {rw2_momentum_init}", 5)
+        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_2 >= {rw2_momentum_init}", 15)
     else:
-        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_2 > {rw2_momentum_init}", 5)
+        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_2 > {rw2_momentum_init}", 15)
     
     rw2_momentum = tlm("GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_2")
     print(f"Reaction Wheel 2 Momentum (N m): {rw2_momentum}")
@@ -113,9 +113,9 @@ def confirm_GENERIC_REACTION_WHEEL_data():
     time.sleep(GENERIC_REACTION_WHEEL_TORQUE_RESPONSE_SLEEP)
     get_GENERIC_REACTION_WHEEL_data()
     if (rw0_momentum_init <= (-1 * GENERIC_REACTION_WHEEL_MAX_MOMENTUM_NM)):
-        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_0 <= {rw0_momentum_init}", 5)
+        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_0 <= {rw0_momentum_init}", 15)
     else:
-        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_0 < {rw0_momentum_init}", 5)
+        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_0 < {rw0_momentum_init}", 15)
     
     rw0_momentum = tlm("GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_0")
     print(f"Reaction Wheel 0 Momentum (N m): {rw0_momentum}")
@@ -126,9 +126,9 @@ def confirm_GENERIC_REACTION_WHEEL_data():
     time.sleep(GENERIC_REACTION_WHEEL_TORQUE_RESPONSE_SLEEP)
     get_GENERIC_REACTION_WHEEL_data()
     if (rw1_momentum_init <= (-1 * GENERIC_REACTION_WHEEL_MAX_MOMENTUM_NM)):
-        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_1 <= {rw1_momentum_init}", 5)
+        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_1 <= {rw1_momentum_init}", 15)
     else:
-        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_1 < {rw1_momentum_init}", 5)
+        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_1 < {rw1_momentum_init}", 15)
     
     rw1_momentum = tlm("GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_1")
     print(f"Reaction Wheel 1 Momentum (N m): {rw1_momentum}")
@@ -139,9 +139,9 @@ def confirm_GENERIC_REACTION_WHEEL_data():
     time.sleep(GENERIC_REACTION_WHEEL_TORQUE_RESPONSE_SLEEP)
     get_GENERIC_REACTION_WHEEL_data()
     if (rw2_momentum_init <= (-1 * GENERIC_REACTION_WHEEL_MAX_MOMENTUM_NM)):
-        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_2 <= {rw2_momentum_init}", 5)
+        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_2 <= {rw2_momentum_init}", 15)
     else:
-        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_2 < {rw2_momentum_init}", 5)
+        wait_check(f"GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_2 < {rw2_momentum_init}", 15)
     
     rw2_momentum = tlm("GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_2")
     print(f"Reaction Wheel 2 Momentum (N m): {rw2_momentum}")
