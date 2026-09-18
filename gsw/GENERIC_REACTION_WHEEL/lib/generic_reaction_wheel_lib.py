@@ -107,6 +107,9 @@ def confirm_GENERIC_REACTION_WHEEL_data():
     rw2_momentum = tlm("GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_2")
     print(f"Reaction Wheel 2 Momentum (N m): {rw2_momentum}")
 
+    turn_off_RWS()
+    time.sleep(2)
+
     # Checking RW 0 Negative Direction
     rw0_momentum_init = tlm("GENERIC_REACTION_WHEEL_DEBUG GENRW_HK_TLM_T MOMENTUM_NMS_0")
     GENERIC_REACTION_WHEEL_cmd("GENERIC_REACTION_WHEEL_DEBUG GENERIC_RW_SET_TORQUE_CC with WHEEL_NUMBER 0, TORQUE -10")
